@@ -1,0 +1,148 @@
+package vn.iotstar.entity;
+
+import java.io.Serializable;
+import java.sql.Date;
+import jakarta.persistence.*;
+import lombok.*;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+@Entity
+@Table(name = "users")
+@NamedQuery(name = "User.findAll", query = "SELECT u FROM User u")
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(length = 100)
+    private String email;
+
+    @Column(length = 50, unique = true, nullable = false)
+    private String username;
+
+    @Column(length = 100)
+    private String fullname;
+
+    @Column(length = 100, nullable = false)
+    private String password;
+
+    @Column(length = 255)
+    private String avatar;
+
+    private int roleid;
+
+    @Column(length = 20)
+    private String phone;
+
+    private Date createdDate;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getUserName() {
+        return this.username;
+    }
+
+    public void setUserName(String username) {
+        this.username = username;
+    }
+
+    public String getFullname() {
+        return fullname;
+    }
+
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
+    }
+
+    public String getFullName() {
+        return this.fullname;
+    }
+
+    public void setFullName(String fullname) {
+        this.fullname = fullname;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPassWord() {
+        return this.password;
+    }
+
+    public void setPassWord(String password) {
+        this.password = password;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public int getRoleid() {
+        return roleid;
+    }
+
+    public void setRoleid(int roleid) {
+        this.roleid = roleid;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public String getRoleName() {
+        if (roleid == 1) {
+            return "ADMIN";
+        }
+        if (roleid == 2) {
+            return "MANAGER";
+        }
+        return "USER";
+    }
+}
