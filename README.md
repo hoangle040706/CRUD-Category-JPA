@@ -1,22 +1,11 @@
-# BÀI TẬP 02: CRUD CATEGORY & VIDEO BẰNG JPA 3.0 (JAKARTA EE)
-
-**Môn học:** Lập trình Web / Công nghệ phần mềm  
-**Giảng viên:** ThS. Nguyễn Hữu Trung  
-**Sinh viên thực hiện:** Lê Minh Hoàng  
-**MSSV:** 24133019  
-**Trường:** Đại học Sư phạm Kỹ thuật TP.HCM (HCMUTE)  
-
----
-
 ## 1. Giới thiệu & Yêu cầu đề bài
 
-Dự án hoàn thành toàn bộ yêu cầu của **Bài tập 02** (thay thế công nghệ JDBC thuần ở Bài tập 01 bằng **JPA 3.0 / Hibernate 7.x** trên nền tảng **Jakarta EE 10/11**):
-1. **Cấu hình & Test JPA (Link LMS 1680922):**
+1. **Cấu hình & Test JPA:**
    - Cấu hình file `persistence.xml` chuẩn JPA 3.0 (`jakarta.persistence`) kết nối MySQL (`servletjpa`).
    - Xây dựng Entity `Category` (Quan hệ `@OneToMany` với `Video`) và `Video` (Quan hệ `@ManyToOne` với `Category`).
    - Class tiện ích `JpaConfig` / `JPAConfig` quản lý `EntityManagerFactory` & cấp phát `EntityManager`.
    - Lớp kiểm thử `vn.iotstar.config.Test` tự động sinh bảng (`hibernate.hbm2ddl.auto = update`) và thêm dữ liệu kiểm thử.
-2. **CRUD Category bằng JPA (Link LMS 1680925):**
+2. **CRUD Category bằng JPA:**
    - Tầng DAO: `ICategoryDao` và `CategoryDao` thực thi các hàm `insert`, `update`, `delete`, `findById`, `findByCategoryname`, `findAll()`, `searchByName()`, `findAll(page, pagesize)`, `count()` bằng JPQL và EntityManager.
    - Tầng Service: `ICategoryService` và `CategoryServiceImpl` xử lý nghiệp vụ, kiểm tra tên trùng lặp, tự động xóa file ảnh cũ khi cập nhật hoặc xóa danh mục.
    - Tầng Controller: `CategoryController` với các URL mappings `/admin/categories`, `/admin/category/add`, `/admin/category/insert`, `/admin/category/edit`, `/admin/category/update`, `/admin/category/delete`.
@@ -139,22 +128,3 @@ SUCCESS: Persisted Category and Video into database via JPA!
 | **user** | `123456` | **5 (User)** | `/waiting` ➔ `/home` | Người dùng thông thường, xem dữ liệu |
 
 ---
-
-## 6. Hướng dẫn Đẩy Code lên GitHub
-
-Để nộp link bài làm lên UTEX LMS theo đúng yêu cầu đề bài:
-
-1. Đăng nhập vào [GitHub](https://github.com/) và tạo một repository mới (ví dụ: `LTW-JPA-CRUD-Category`).
-2. Mở terminal tại thư mục dự án `my-project` và thực thi:
-   ```bash
-   # Khởi tạo remote trỏ đến repository GitHub của bạn
-   git remote add origin https://github.com/<username-cua-ban>/<ten-repo>.git
-
-   # Đổi tên nhánh chính thành main
-   git branch -M main
-
-   # Đẩy toàn bộ mã nguồn lên GitHub
-   git push -u origin main
-   ```
-3. Copy đường link repository GitHub vừa tạo và dán vào ô **"Thêm bài nộp"** trên hệ thống UTEX LMS:
-   - Link nộp bài: `https://utexlms.hcmute.edu.vn/mod/assign/view.php?id=...`
