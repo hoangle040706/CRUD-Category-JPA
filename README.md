@@ -1,14 +1,3 @@
-# BÀI TẬP 16/11: KÍCH HOẠT TÀI KHOẢN OTP EMAIL, BCRYPT MẬT KHẨU & QUÊN MẬT KHẨU
-
-**Môn học:** Lập trình Web / Công nghệ phần mềm  
-**Giảng viên:** ThS. Nguyễn Hữu Trung  
-**Sinh viên thực hiện:** Lê Minh Hoàng  
-**MSSV:** 24133019  
-**Trường:** Đại học Sư phạm Kỹ thuật TP.HCM (HCMUTE)  
-**Thời hạn nộp bài:** 16:30 ngày 16/11/2026 (Commit GitHub)  
-
----
-
 ## 1. Mục tiêu & Các chức năng hoàn thành
 
 Dự án hiện thực trọn vẹn và an toàn 3 yêu cầu trọng tâm của buổi học ngày 16/11/2026:
