@@ -1,16 +1,42 @@
-## 1. Giới thiệu & Yêu cầu đề bài
+# BÀI TẬP 16/11: KÍCH HOẠT TÀI KHOẢN OTP EMAIL, BCRYPT MẬT KHẨU & QUÊN MẬT KHẨU
 
-1. **Cấu hình & Test JPA:**
-   - Cấu hình file `persistence.xml` chuẩn JPA 3.0 (`jakarta.persistence`) kết nối MySQL (`servletjpa`).
-   - Xây dựng Entity `Category` (Quan hệ `@OneToMany` với `Video`) và `Video` (Quan hệ `@ManyToOne` với `Category`).
-   - Class tiện ích `JpaConfig` / `JPAConfig` quản lý `EntityManagerFactory` & cấp phát `EntityManager`.
-   - Lớp kiểm thử `vn.iotstar.config.Test` tự động sinh bảng (`hibernate.hbm2ddl.auto = update`) và thêm dữ liệu kiểm thử.
-2. **CRUD Category bằng JPA:**
-   - Tầng DAO: `ICategoryDao` và `CategoryDao` thực thi các hàm `insert`, `update`, `delete`, `findById`, `findByCategoryname`, `findAll()`, `searchByName()`, `findAll(page, pagesize)`, `count()` bằng JPQL và EntityManager.
-   - Tầng Service: `ICategoryService` và `CategoryServiceImpl` xử lý nghiệp vụ, kiểm tra tên trùng lặp, tự động xóa file ảnh cũ khi cập nhật hoặc xóa danh mục.
-   - Tầng Controller: `CategoryController` với các URL mappings `/admin/categories`, `/admin/category/add`, `/admin/category/insert`, `/admin/category/edit`, `/admin/category/update`, `/admin/category/delete`.
-   - Hỗ trợ cả 2 hình thức ảnh: tải file trực tiếp từ máy tính (`@MultipartConfig`, lưu tại thư mục hệ thống `Constant.DIR`) hoặc nhập trực tiếp URL ảnh online (`https://...`).
-   - Quản trị bảo mật: Giữ nguyên tính năng xác thực đăng nhập, mã hóa, rẽ nhánh theo quyền (`roleid = 1`: Admin, `roleid = 2`: Manager, `roleid = 5`: User) qua `AuthFilter` và `WaitingController`.
+**Môn học:** Lập trình Web / Công nghệ phần mềm  
+**Giảng viên:** ThS. Nguyễn Hữu Trung  
+**Sinh viên thực hiện:** Lê Minh Hoàng  
+**MSSV:** 24133019  
+**Trường:** Đại học Sư phạm Kỹ thuật TP.HCM (HCMUTE)  
+**Thời hạn nộp bài:** 16:30 ngày 16/11/2026 (Commit GitHub)  
+
+---
+
+## 1. Mục tiêu & Các chức năng hoàn thành
+
+Dự án hiện thực trọn vẹn và an toàn 3 yêu cầu trọng tâm của buổi học ngày 16/11/2026:
+
+1. **Bổ sung chức năng kích hoạt tài khoản bằng OTP gửi qua email khi đăng ký tài khoản:**
+   - Người dùng đăng ký tài khoản mới (`/register`): tài khoản được tạo ở trạng thái chưa kích hoạt (`status = 0`).
+   - Mã OTP 6 chữ số ngẫu nhiên được sinh bằng bộ sinh số an toàn mật mã `SecureRandom`.
+   - Gửi email OTP bất đồng bộ (`sendOtpAsync`) qua `ThreadPoolExecutor` có bounded queue, không làm nghẽn luồng xử lý web request.
+   - Thời hạn sử dụng mã OTP (5 phút) được worker cập nhật ngay trước khi gửi email, tránh hao hụt thời gian do xếp hàng hoặc race condition.
+   - Khi hàng đợi đầy (`RejectedExecutionException`) hoặc gửi SMTP lỗi, hệ thống tự động giải phóng cooldown và hủy triệt để OTP mồ côi (`cancelOtp`).
+   - Giao diện xác thực `/verify-otp` hỗ trợ đếm ngược 60s cho nút gửi lại mã OTP.
+   - Giới hạn nhập sai tối đa 5 lần: lần sai 1..4 tăng biến đếm cảnh báo; lần sai thứ 5 hủy mã ngay lập tức.
+   - Câu lệnh cập nhật nguyên tử (`consumeRegisterOtp`) ngăn chặn race condition khi nhiều request xác thực đồng thời.
+
+2. **Chức năng đăng nhập với mật khẩu mã hóa BCrypt & Đăng xuất:**
+   - Mã hóa mật khẩu một chiều bằng **BCrypt** (cost factor = 10) với `jbcrypt:0.4`.
+   - Kiểm tra giới hạn độ dài mật khẩu nghiêm ngặt $\le 72$ byte UTF-8 theo tiêu chuẩn BCrypt.
+   - Cơ chế nâng cấp mật khẩu tự động (**Lazy re-hash**): tài khoản cũ dạng plaintext khi đăng nhập thành công sẽ tự động được băm lại thành chuẩn BCrypt trong cơ sở dữ liệu.
+   - Kiểm tra trạng thái tài khoản: từ chối và yêu cầu xác thực OTP nếu `status != 1`.
+   - Cơ chế **Remember Me** bảo mật cao (Single Active Device Session): sinh token ngẫu nhiên 32-byte, băm SHA-256 lưu DB, xoay token nguyên tử (Token Rotation) tại mỗi phiên làm việc, chống Replay Attack và kiểm tra điều kiện `status = 1`.
+   - Đăng xuất (`/logout`): thu hồi và xóa sạch token trong DB, xóa session và hủy cookie trình duyệt.
+   - Phòng chống **Session Fixation** bằng `req.changeSessionId()` khi đăng nhập thành công.
+
+3. **Chức năng quên mật khẩu & đặt lại mật khẩu mới qua OTP Email:**
+   - Người dùng nhập email tại `/forgot-password`: phản hồi timing-safe không để lộ sự tồn tại của tài khoản.
+   - Cơ chế cooldown 60 giây (`otpCooldownAt`) nguyên tử chống spam gửi yêu cầu.
+   - Giao diện đặt lại mật khẩu `/reset-password`: tiếp nhận mã OTP, mật khẩu mới và xác nhận mật khẩu.
+   - Cập nhật mật khẩu mới băm BCrypt nguyên tử (`consumeForgotPasswordOtp`), tiêu thụ OTP và giữ nguyên trạng thái tài khoản.
 
 ---
 
@@ -18,113 +44,99 @@
 
 - **Java Version:** OpenJDK 17 / 21
 - **JPA & ORM Framework:** Hibernate ORM 7.4.6.Final (JPA 3.0 - `jakarta.persistence.*`)
-- **Validation:** Hibernate Validator 8.0.5.Final, Jakarta EL 4.0.2
-- **Web Platform:** Jakarta Servlet 6.1, JSP 4.0, JSTL 3.0.1 (Chạy trên Tomcat 11)
-- **Database:** MySQL 8.x (`mysql-connector-j:8.4.0`)
-- **Tiện ích:** Project Lombok 1.18.36, Apache Commons IO 2.16.1
+- **Mã hóa & Bảo mật:** `org.mindrot:jbcrypt:0.4`, SHA-256 (`HashUtil`), `SecureRandom`
+- **Gửi Email Bất đồng bộ:** `org.eclipse.angus:jakarta.mail:2.0.3` (Jakarta Mail), Java `ThreadPoolExecutor`
+- **Web Platform:** Jakarta Servlet 6.1, JSP 4.0, JSTL 3.0.1 (Tomcat 11)
+- **Database:** MySQL 8.x / 8.4 (`mysql-connector-j:8.4.0`)
+- **Kiểm thử tự động:** JUnit 5 (`junit-jupiter:5.10.2`), Maven Surefire Plugin 3.2.5
 - **Build Tool:** Apache Maven 3.x
 
 ---
 
-## 3. Cấu trúc dự án
+## 3. Cấu trúc Dự án (Checklist 25 File)
 
 ```
 my-project/
-├── pom.xml                                     # Cấu hình Maven: Jakarta EE, Hibernate 7, MySQL, Lombok
-├── database.sql                                # Script khởi tạo MySQL database & dữ liệu mẫu
-├── src/main/resources/
-│   └── META-INF/
-│       └── persistence.xml                     # Cấu hình Persistence Unit jpa-hibernate-mysql
+├── pom.xml                                     # Maven dependencies: jbcrypt, jakarta.mail, junit-jupiter
+├── database.sql                                # DDL schema_version, users, Stored Procedure migration có lock
+├── database-lab-seed.sql                       # Fixtures kiểm thử lab (lmh, manager, user, legacy_user)
 ├── src/main/java/vn/iotstar/
 │   ├── config/
-│   │   ├── JpaConfig.java & JPAConfig.java     # Quản lý EntityManagerFactory
-│   │   └── Test.java                           # Hàm main kiểm thử cấu hình & sinh schema JPA
+│   │   ├── JpaConfig.java                      # Cấu hình EntityManagerFactory
+│   │   └── AppContextListener.java             # Quản lý ThreadPoolExecutor gửi mail
 │   ├── entity/
-│   │   ├── Category.java                       # Entity Category (@OneToMany Video)
-│   │   ├── Video.java                          # Entity Video (@ManyToOne Category)
-│   │   └── User.java                           # Entity User (@Id, roleid, email, ...)
+│   │   ├── User.java                           # Entity User (status, code, otpExpired, otpAttempts, ...)
+│   │   ├── Category.java & Video.java          # Entity Category & Video (Bài tập trước)
+│   ├── util/
+│   │   ├── PasswordUtil.java                   # Pure utility băm BCrypt cost 10, kiểm tra <= 72 bytes
+│   │   ├── HashUtil.java                       # Tiện ích băm SHA-256, sinh token SecureRandom
+│   │   ├── EmailUtil.java                      # Jakarta Mail async, DEV_MODE logger, orphan cleanup
+│   │   └── Constant.java                       # Cấu hình DEV_MODE, SMTP, Session keys, Cookie names
 │   ├── dao/
-│   │   ├── ICategoryDao.java & CategoryDao.java# CRUD Category bằng JPA EntityManager / JPQL
-│   │   └── IUserDao.java & UserDao.java        # DAO User phục vụ Login/Register/Auth
+│   │   ├── IUserDao.java & UserDao.java        # Atomic queries: lockOtpRequest, consumeOtp, rotateToken
+│   │   └── ICategoryDao.java & CategoryDao.java
 │   ├── service/
-│   │   ├── ICategoryService.java & CategoryServiceImpl.java # Xử lý nghiệp vụ & xóa file ảnh cũ
-│   │   └── IUserService.java & UserServiceImpl.java         # Xác thực & phân quyền người dùng
-│   ├── controllers/
-│   │   ├── CategoryController.java             # Quản lý CRUD Category (/admin/categories, /admin/category/*)
-│   │   ├── DownloadImageController.java        # Stream hiển thị ảnh từ thư mục lưu trữ (/image?fname=...)
-│   │   ├── HomeController.java                 # Trang chủ (/home)
-│   │   ├── LoginController.java                # Đăng nhập (/login)
-│   │   ├── RegisterController.java             # Đăng ký (/register)
-│   │   ├── WaitingController.java              # Rẽ nhánh theo quyền sau khi đăng nhập (/waiting)
-│   │   ├── LogoutController.java               # Đăng xuất (/logout)
-│   │   ├── AdminHomeController.java            # Trang quản trị (/admin/home)
-│   │   └── ManagerHomeController.java          # Trang quản lý (/manager/home)
+│   │   ├── IUserService.java & UserServiceImpl.java # Nghiệp vụ OTP, re-hash, Remember Me rotation
+│   │   └── ICategoryService.java & CategoryServiceImpl.java
 │   ├── filter/
-│   │   └── AuthFilter.java                     # Bộ lọc phân quyền (Chỉ roleid = 1 được sửa đổi Category)
-│   └── util/
-│       └── Constant.java                       # Cấu hình đường dẫn lưu file ảnh (Constant.DIR)
-└── src/main/webapp/
-    ├── WEB-INF/
-    │   └── web.xml                             # Web descriptor (tracking-mode COOKIE)
-    ├── index.jsp                               # Trang đích chuyển hướng tự động về /home
-    └── views/
-        ├── login.jsp & register.jsp            # Giao diện Đăng nhập / Đăng ký
-        ├── home.jsp                            # Giao diện Trang chủ người dùng
-        └── admin/
-            ├── home.jsp                        # Giao diện Trang quản trị Admin
-            ├── category-list.jsp               # Danh sách danh mục, tìm kiếm, nút Thêm/Sửa/Xóa
-            ├── category-add.jsp                # Form thêm mới danh mục (File upload & URL online)
-            └── category-edit.jsp               # Form cập nhật danh mục kèm xem trước ảnh cũ
+│   │   ├── RememberMeFilter.java               # Auto login qua cookie remember-me & xoay token mới
+│   │   └── AuthFilter.java                     # Phân quyền truy cập các đường dẫn quản trị
+│   └── controllers/
+│       ├── RegisterController.java             # Tiếp nhận đăng ký, băm mật khẩu, sinh OTP
+│       ├── VerifyOtpController.java            # Xác thực OTP kích hoạt (/verify-otp, /resend-otp)
+│       ├── LoginController.java                # Đăng nhập BCrypt, Remember Me, changeSessionId
+│       ├── LogoutController.java               # Đăng xuất an toàn, xóa cookie, clear token DB
+│       ├── ForgotPasswordController.java       # Quên mật khẩu (/forgot-password)
+│       ├── ResetPasswordController.java        # Đặt lại mật khẩu (/reset-password, /resend-reset-otp)
+│       └── WaitingController.java, CategoryController.java, HomeController.java...
+├── src/test/java/vn/iotstar/
+│   └── AuthIntegrationTest.java                # Bộ kiểm thử 8 kịch bản tự động (TC-01 -> TC-08)
+└── src/main/webapp/views/
+    ├── login.jsp & register.jsp                # View đăng nhập (link quên mk, remember me) & đăng ký
+    └── auth/
+        ├── verify-otp.jsp                      # Giao diện nhập OTP kích hoạt 6 số & đếm ngược 60s
+        ├── forgot-password.jsp                 # Giao diện gửi yêu cầu OTP quên mật khẩu
+        └── reset-password.jsp                  # Giao diện nhập OTP và mật khẩu mới
 ```
 
 ---
 
-## 4. Hướng dẫn cài đặt & Thực thi
+## 4. Hướng dẫn Triển khai & Kiểm thử
 
-### Bước 1: Chuẩn bị Cơ sở dữ liệu MySQL
-1. Khởi động MySQL Server (port 3306).
-2. Tạo database hoặc import file `database.sql`:
+### Bước 1: Cấu hình Cơ sở dữ liệu MySQL
+1. Khởi chạy MySQL Server (port 3306).
+2. Chạy migration cơ sở dữ liệu:
    ```bash
-   mysql -u root -p < database.sql
+   mysql -u root -p123456 servletjpa < database.sql
    ```
-   *(Mặc định cấu hình user `root`, mật khẩu `123456`, tên database `servletjpa` trong file `persistence.xml`)*.
+3. Nạp dữ liệu seed kiểm thử lab:
+   ```bash
+   mysql -u root -p123456 servletjpa < database-lab-seed.sql
+   ```
 
-### Bước 2: Kiểm thử JPA độc lập (Test.java)
-Chạy lệnh Maven để kiểm tra Hibernate tự động tạo/cập nhật bảng và thực thi Transaction lưu Category & Video:
+### Bước 2: Chạy Toàn bộ 8 Kịch bản Kiểm thử Tự động (JUnit 5)
+Chạy lệnh kiểm thử tự động của Maven:
 ```bash
-mvn compile exec:java -Dexec.mainClass="vn.iotstar.config.Test"
+mvn test
 ```
-Kết quả thành công sẽ xuất dòng:
+Kết quả kiểm thử thực tế:
+- **TC-01: BCrypt Hashing & Password Limits**: Kiểm tra băm BCrypt cost 10 và chặn mật khẩu quá 72 bytes UTF-8.
+- **TC-02: Instant Verification**: Xác thực thành công ngay khi nhận mail (thời hạn OTP đã được worker ghi nhận trước).
+- **TC-03: Expired OTP**: Từ chối mã OTP đã quá hạn 5 phút.
+- **TC-04: Fifth Attempt Cancellation**: Lần sai 1..4 tăng biến đếm; lần sai thứ 5 hủy mã tức thì.
+- **TC-05: Concurrency Race on Same OTP**: 2 luồng cạnh tranh cùng 1 mã OTP, duy nhất 1 luồng thành công.
+- **TC-06: OTP Orphan Cleanup**: Hủy OTP và giải phóng cooldown khi gặp lỗi gửi hoặc hàng đợi đầy.
+- **TC-07: Remember Me Token Rotation & Status = 1**: Xoay token SHA-256 nguyên tử, chống replay, từ chối tài khoản chưa kích hoạt.
+- **TC-08: Legacy Plaintext Re-hash**: Tài khoản plaintext cũ tự động băm lại BCrypt khi đăng nhập.
+
+### Bước 3: Đóng gói WAR & Triển khai Tomcat
+```bash
+mvn clean package
+cp target/my-project.war /home/lmh/tools/apache-tomcat-11.0.27/webapps/
+/home/lmh/tools/apache-tomcat-11.0.27/bin/startup.sh
 ```
-SUCCESS: Persisted Category and Video into database via JPA!
-```
 
-### Bước 3: Đóng gói và Deploy lên Tomcat 11
-1. Build file WAR:
-   ```bash
-   mvn clean package
-   ```
-2. Copy file `target/my-project.war` vào thư mục `webapps` của Apache Tomcat 11:
-   ```bash
-   cp target/my-project.war /path/to/apache-tomcat-11.x/webapps/
-   ```
-3. Khởi động Tomcat:
-   ```bash
-   /path/to/apache-tomcat-11.x/bin/catalina.sh run
-   ```
-4. Mở trình duyệt và truy cập:
-   ```
-   http://localhost:8080/my-project/
-   ```
-
----
-
-## 5. Tài khoản kiểm thử & Phân quyền
-
-| Tài khoản | Mật khẩu | Quyền hạn (roleid) | Luồng chuyển hướng | Quyền hạn thao tác |
-| :--- | :--- | :--- | :--- | :--- |
-| **lmh** | `123456` | **1 (Admin)** | `/waiting` ➔ `/admin/categories` | Toàn quyền Thêm / Sửa / Xóa Category, Upload ảnh |
-| **manager** | `123456` | **2 (Manager)** | `/waiting` ➔ `/manager/home` | Quản lý nghiệp vụ |
-| **user** | `123456` | **5 (User)** | `/waiting` ➔ `/home` | Người dùng thông thường, xem dữ liệu |
-
----
+### Bước 4: Chế độ Phát triển (DEV_MODE)
+Khi chưa có thông tin SMTP Gmail thật, biến môi trường hoặc cờ JVM `-DAPP_DEV_MODE=true` sẽ tự động:
+- Bật ghi nhận mã OTP ra terminal / `catalina.out` để tester dễ dàng lấy mã xác thực.
+- Bỏ qua lệnh gửi SMTP thực tế khi không có `SMTP_PASS`.

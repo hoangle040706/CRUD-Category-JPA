@@ -18,7 +18,7 @@ public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(length = 100)
+    @Column(length = 100, unique = true, nullable = false)
     private String email;
 
     @Column(length = 50, unique = true, nullable = false)
@@ -39,6 +39,28 @@ public class User implements Serializable {
     private String phone;
 
     private Date createdDate;
+
+    private int status;
+
+    @Column(length = 10)
+    private String code;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date otpExpired;
+
+    private int otpAttempts;
+
+    @Column(length = 20)
+    private String otpType;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date otpCooldownAt;
+
+    @Column(length = 64)
+    private String rememberTokenHash;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.util.Date rememberTokenExpiry;
 
     public int getId() {
         return id;
@@ -134,6 +156,70 @@ public class User implements Serializable {
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public java.util.Date getOtpExpired() {
+        return otpExpired;
+    }
+
+    public void setOtpExpired(java.util.Date otpExpired) {
+        this.otpExpired = otpExpired;
+    }
+
+    public int getOtpAttempts() {
+        return otpAttempts;
+    }
+
+    public void setOtpAttempts(int otpAttempts) {
+        this.otpAttempts = otpAttempts;
+    }
+
+    public String getOtpType() {
+        return otpType;
+    }
+
+    public void setOtpType(String otpType) {
+        this.otpType = otpType;
+    }
+
+    public java.util.Date getOtpCooldownAt() {
+        return otpCooldownAt;
+    }
+
+    public void setOtpCooldownAt(java.util.Date otpCooldownAt) {
+        this.otpCooldownAt = otpCooldownAt;
+    }
+
+    public String getRememberTokenHash() {
+        return rememberTokenHash;
+    }
+
+    public void setRememberTokenHash(String rememberTokenHash) {
+        this.rememberTokenHash = rememberTokenHash;
+    }
+
+    public java.util.Date getRememberTokenExpiry() {
+        return rememberTokenExpiry;
+    }
+
+    public void setRememberTokenExpiry(java.util.Date rememberTokenExpiry) {
+        this.rememberTokenExpiry = rememberTokenExpiry;
     }
 
     public String getRoleName() {
