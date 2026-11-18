@@ -133,8 +133,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="poster">Ảnh bìa (Poster) (Tối đa 5MB)</label>
+                        <label for="poster">Ảnh bìa (Poster)</label>
                         <input type="file" id="poster" name="poster" accept="image/*">
+                        <div class="help-text" style="color: #64748b; font-size: 12px; margin-top: 4px;">Tùy chọn. Với nguồn YouTube, nếu để trống thì hệ thống sẽ tự động lấy ảnh Thumbnail chính thức từ YouTube.</div>
                     </div>
 
                     <div class="form-group">

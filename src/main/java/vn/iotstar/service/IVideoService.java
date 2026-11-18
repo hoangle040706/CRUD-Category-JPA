@@ -22,4 +22,5 @@ public interface IVideoService {
     boolean adminUpdateActive(String videoId, int active);
     void incrementViews(String videoId);
     String normalizeYouTubeEmbedUrl(String rawUrl);
+    String extractYouTubeThumbnailUrl(String rawUrlOrEmbedPath);
 }

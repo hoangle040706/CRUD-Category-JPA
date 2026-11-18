@@ -513,5 +513,12 @@ public class VideoIntegrationTest {
         // Chuỗi rỗng hoặc null
         assertNull(videoService.normalizeYouTubeEmbedUrl(null));
         assertNull(videoService.normalizeYouTubeEmbedUrl("   "));
+
+        // Kiểm tra trích xuất Thumbnail URL chính thức từ YouTube
+        assertEquals("https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+                videoService.extractYouTubeThumbnailUrl(watchUrl));
+        assertEquals("https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+                videoService.extractYouTubeThumbnailUrl("https://www.youtube.com/embed/dQw4w9WgXcQ"));
+        assertNull(videoService.extractYouTubeThumbnailUrl(null));
     }
 }

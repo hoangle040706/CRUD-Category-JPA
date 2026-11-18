@@ -172,6 +172,10 @@ public class UserVideoController extends HttpServlet {
                     req.getRequestDispatcher("/views/video/upload.jsp").forward(req, resp);
                     return;
                 }
+                // Tự động lấy thumbnail YouTube nếu người dùng không upload poster riêng
+                if (savedPosterName == null || savedPosterName.trim().isEmpty()) {
+                    savedPosterName = videoService.extractYouTubeThumbnailUrl(savedVideoPath);
+                }
             }
 
             Video video = new Video();
@@ -287,6 +291,12 @@ public class UserVideoController extends HttpServlet {
             } else {
                 if (youtubeUrl != null && !youtubeUrl.trim().isEmpty()) {
                     newVideoPath = videoService.normalizeYouTubeEmbedUrl(youtubeUrl);
+                }
+                if (newPosterName == null || newPosterName.trim().isEmpty()) {
+                    String finalPath = newVideoPath != null ? newVideoPath : oldVideoPath;
+                    if (oldPoster == null || oldPoster.trim().isEmpty() || oldPoster.startsWith("http")) {
+                        newPosterName = videoService.extractYouTubeThumbnailUrl(finalPath);
+                    }
                 }
             }
 

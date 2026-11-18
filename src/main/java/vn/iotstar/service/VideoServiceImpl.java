@@ -118,4 +118,19 @@ public class VideoServiceImpl implements IVideoService {
         }
         return trimmed;
     }
+
+    @Override
+    public String extractYouTubeThumbnailUrl(String rawUrlOrEmbedPath) {
+        if (rawUrlOrEmbedPath == null || rawUrlOrEmbedPath.trim().isEmpty()) {
+            return null;
+        }
+        Pattern pattern = Pattern.compile(
+                "(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/(?:watch\\?.*v=|embed\\/|v\\/)|youtu\\.be\\/)([a-zA-Z0-9_-]{11})");
+        Matcher matcher = pattern.matcher(rawUrlOrEmbedPath.trim());
+        if (matcher.find()) {
+            String ytid = matcher.group(1);
+            return "https://img.youtube.com/vi/" + ytid + "/hqdefault.jpg";
+        }
+        return null;
+    }
 }

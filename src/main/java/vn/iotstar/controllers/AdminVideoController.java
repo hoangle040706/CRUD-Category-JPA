@@ -182,6 +182,9 @@ public class AdminVideoController extends HttpServlet {
                     req.getRequestDispatcher("/views/admin/video-add.jsp").forward(req, resp);
                     return;
                 }
+                if (savedPosterName == null || savedPosterName.trim().isEmpty()) {
+                    savedPosterName = videoService.extractYouTubeThumbnailUrl(savedVideoPath);
+                }
             }
 
             Video video = new Video();
@@ -296,6 +299,12 @@ public class AdminVideoController extends HttpServlet {
             } else {
                 if (youtubeUrl != null && !youtubeUrl.trim().isEmpty()) {
                     newVideoPath = videoService.normalizeYouTubeEmbedUrl(youtubeUrl);
+                }
+                if (newPosterName == null || newPosterName.trim().isEmpty()) {
+                    String finalPath = newVideoPath != null ? newVideoPath : existing.getVideoPath();
+                    if (existing.getPoster() == null || existing.getPoster().trim().isEmpty() || existing.getPoster().startsWith("http")) {
+                        newPosterName = videoService.extractYouTubeThumbnailUrl(finalPath);
+                    }
                 }
             }
 
