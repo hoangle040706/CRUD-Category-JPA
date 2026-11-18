@@ -7,69 +7,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Danh Mục - Admin Dashboard</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #f0f2f5; color: #333; }
-        .topbar { background: #007bff; color: #fff; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; }
-        .topbar h2 { font-size: 20px; font-weight: 600; }
-        .topbar-right a { color: #fff; text-decoration: none; background: #dc3545; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: bold; margin-left: 10px; }
-        .main-container { display: flex; min-height: calc(100vh - 54px); }
-        .sidebar { width: 240px; background: #1e282c; color: #b8c7ce; padding: 20px 0; flex-shrink: 0; }
-        .user-panel { padding: 12px 20px; display: flex; align-items: center; border-bottom: 1px solid #374850; margin-bottom: 15px; }
-        .user-panel img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 12px; }
-        .sidebar-menu { list-style: none; }
-        .sidebar-menu li a { display: block; padding: 12px 20px; color: #b8c7ce; text-decoration: none; font-size: 14px; }
-        .sidebar-menu li a:hover, .sidebar-menu li.active a { background: #1a2226; color: #fff; border-left: 3px solid #007bff; }
-        .content { flex-grow: 1; padding: 25px 30px; overflow-x: auto; }
-        .card { background: #fff; border-radius: 8px; padding: 25px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-        .btn-add { background: #28a745; color: #fff; padding: 9px 18px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px; }
-        .btn-add:hover { background: #218838; }
-        .search-box { display: flex; gap: 8px; }
-        .search-box input { padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; width: 240px; }
-        .search-box button { background: #007bff; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+        body { background-color: #f8fafc; color: #0f172a; line-height: 1.5; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6; vertical-align: middle; font-size: 14px; }
-        th { background: #f8f9fa; color: #495057; font-weight: 600; }
-        tr:hover { background: #f8fafc; }
-        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-        .badge-success { background: #d4edda; color: #155724; }
-        .badge-danger { background: #f8d7da; color: #721c24; }
-        .btn-action { padding: 5px 12px; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: bold; margin-right: 5px; }
-        .btn-edit { background: #ffc107; color: #212529; }
-        .btn-delete { background: #dc3545; color: #fff; }
-        .alert-error { background: #f8d7da; color: #721c24; padding: 12px 15px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #f5c6cb; }
+        /* Unified Topbar */
+        .topbar { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%); color: #fff; box-shadow: 0 2px 10px rgba(30, 58, 138, 0.15); position: sticky; top: 0; z-index: 100; }
+        .topbar-container { max-width: 100%; margin: 0 auto; padding: 0 25px; height: 60px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand-group { display: flex; align-items: center; gap: 28px; }
+        .brand-logo { color: #ffffff; font-size: 18px; font-weight: 700; text-decoration: none; letter-spacing: -0.3px; }
+        .nav-subtitle { color: #bfdbfe; font-size: 13px; font-weight: 500; padding-left: 15px; border-left: 1px solid rgba(255, 255, 255, 0.25); }
+
+        .nav-user-group { display: flex; align-items: center; gap: 14px; }
+        .user-greeting { display: flex; align-items: center; gap: 8px; }
+        .user-name { color: #ffffff; font-weight: 600; font-size: 14px; }
+        .user-role-pill { background: rgba(255, 255, 255, 0.2); color: #ffffff; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .btn-logout { background: rgba(239, 68, 68, 0.9); color: #ffffff; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.15s; }
+        .btn-logout:hover { background: #dc2626; }
+
+        /* Main Container */
+        .main-container { display: flex; min-height: calc(100vh - 60px); }
+        .sidebar { width: 250px; background: #0f172a; color: #94a3b8; padding: 20px 0; flex-shrink: 0; display: flex; flex-direction: column; }
+        .user-panel { padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid #1e293b; margin-bottom: 15px; }
+        .user-panel img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; margin-right: 12px; border: 2px solid #3b82f6; }
+        .online-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; margin-right: 4px; }
+        .user-role-text { font-size: 12px; color: #93c5fd; display: flex; align-items: center; margin-top: 3px; }
+
+        .sidebar-menu { list-style: none; }
+        .sidebar-menu li a { display: block; padding: 12px 22px; color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.15s ease; border-left: 4px solid transparent; }
+        .sidebar-menu li a:hover { background: #1e293b; color: #60a5fa; }
+        .sidebar-menu li.active a { background: #2563eb; color: #ffffff; font-weight: 600; border-left-color: #93c5fd; }
+
+        /* Content Area */
+        .content { flex-grow: 1; padding: 30px; background-color: #f8fafc; overflow-x: auto; }
+        .card { background: #fff; border-radius: 12px; padding: 26px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 16px; }
+        .btn-add { background: #2563eb; color: #fff; padding: 9px 18px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: background 0.15s; }
+        .btn-add:hover { background: #1d4ed8; }
+        .search-box { display: flex; gap: 8px; }
+        .search-box input { padding: 9px 14px; border: 1px solid #cbd5e1; border-radius: 6px; width: 250px; font-size: 14px; outline: none; transition: all 0.15s; }
+        .search-box input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18); }
+        .search-box button { background: #2563eb; color: #fff; border: none; padding: 9px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.15s; }
+        .search-box button:hover { background: #1d4ed8; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 13px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: middle; font-size: 14px; }
+        th { background-color: #f1f5f9; color: #334155; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        tr:hover { background-color: #f8fafc; }
+        
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .badge-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .badge-danger { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        
+        .btn-action { padding: 5px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600; margin-right: 6px; display: inline-block; transition: all 0.15s; }
+        .btn-edit { background: #f59e0b; color: #fff; }
+        .btn-edit:hover { background: #d97706; }
+        .btn-delete { background: #ef4444; color: #fff; }
+        .btn-delete:hover { background: #dc2626; }
+        .alert-error { background: #fef2f2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca; font-size: 14px; }
     </style>
 </head>
 <body>
-    <div class="topbar">
-        <h2>📁 Quản Lý Danh Mục Sản Phẩm</h2>
-        <div class="topbar-right">
-            <span>Xin chào, <strong>${sessionScope.account != null ? sessionScope.account.username : 'User'}</strong></span>
-            <a href="<c:url value='/logout' />">Đăng xuất</a>
+    <header class="topbar">
+        <div class="topbar-container">
+            <div class="nav-brand-group">
+                <a href="${pageContext.request.contextPath}/home" class="brand-logo">MyVideo Platform</a>
+                <span class="nav-subtitle">Quản Lý Danh Mục Sản Phẩm</span>
+            </div>
+            <div class="nav-user-group">
+                <div class="user-greeting">
+                    <span class="user-name"><c:out value="${sessionScope.account != null ? sessionScope.account.username : 'User'}" /></span>
+                    <span class="user-role-pill">
+                        <c:choose>
+                            <c:when test="${sessionScope.account != null && sessionScope.account.roleid == 1}">Admin</c:when>
+                            <c:when test="${sessionScope.account != null && sessionScope.account.roleid == 2}">Manager</c:when>
+                            <c:otherwise>Thành viên</c:otherwise>
+                        </c:choose>
+                    </span>
+                </div>
+                <a href="<c:url value='/logout' />" class="btn-logout">Đăng xuất</a>
+            </div>
         </div>
-    </div>
+    </header>
 
     <div class="main-container">
-        <div class="sidebar">
+        <aside class="sidebar">
             <div class="user-panel">
                 <c:url value="/image?fname=${sessionScope.account != null && not empty sessionScope.account.avatar ? sessionScope.account.avatar : 'admin.png'}" var="userAvatar" />
                 <img src="${userAvatar}" alt="User Avatar">
                 <div>
-                    <div style="font-size: 13px; font-weight: bold; color: #fff;"><c:out value="${sessionScope.account != null ? sessionScope.account.userName : 'admin'}" /></div>
-                    <small style="color: #28a745;">● Trực tuyến</small>
+                    <div style="font-size: 14px; font-weight: 600; color: #ffffff;"><c:out value="${sessionScope.account != null ? sessionScope.account.userName : 'admin'}" /></div>
+                    <div class="user-role-text"><span class="online-dot"></span> Trực tuyến</div>
                 </div>
             </div>
             <ul class="sidebar-menu">
-                <li><a href="${pageContext.request.contextPath}/admin/home">📊 Tổng Quan Dashboard</a></li>
-                <li><a href="${pageContext.request.contextPath}/admin/videos">🎬 Quản Lý Video & Duyệt Clip</a></li>
-                <li class="active"><a href="${pageContext.request.contextPath}/admin/category/list">📁 Quản Lý Danh Mục</a></li>
-                <li><a href="${pageContext.request.contextPath}/video">🎥 Kho Video Người Dùng</a></li>
-                <li><a href="${pageContext.request.contextPath}/home">🌐 Về Trang Chủ Web</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/home">Tổng quan Dashboard</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/videos">Quản lý Video</a></li>
+                <li class="active"><a href="${pageContext.request.contextPath}/admin/category/list">Quản lý Danh mục</a></li>
+                <li><a href="${pageContext.request.contextPath}/video">Kho Video người dùng</a></li>
+                <li><a href="${pageContext.request.contextPath}/home">Trang chủ Web</a></li>
             </ul>
-        </div>
+        </aside>
 
-        <div class="content">
+        <main class="content">
             <div class="card">
                 <c:if test="${sessionScope.permissionError != null}">
                     <div class="alert-error">${sessionScope.permissionError}</div>
@@ -78,7 +118,7 @@
 
                 <div class="header-actions">
                     <c:if test="${sessionScope.account == null || sessionScope.account.roleid == 1}">
-                        <a class="btn-add" href="<c:url value='/admin/category/add'/>">➕ Thêm Danh Mục Mới</a>
+                        <a class="btn-add" href="<c:url value='/admin/category/add'/>">Thêm Danh Mục Mới</a>
                     </c:if>
                     <form action="<c:url value='/admin/categories'/>" method="get" class="search-box">
                         <input type="text" name="keyword" placeholder="Tìm theo tên danh mục..." value="${param.keyword}" />
@@ -109,7 +149,7 @@
                                             <c:url value="/image?fname=${cate.images != null && not empty cate.images ? cate.images : 'default.png'}" var="imgUrl" />
                                         </c:otherwise>
                                     </c:choose>
-                                    <img height="60" width="80" style="object-fit: cover; border-radius: 4px;" src="${imgUrl}" alt="${cate.categoryname}" />
+                                    <img height="56" width="76" style="object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;" src="${imgUrl}" alt="${cate.categoryname}" />
                                 </td>
                                 <td><strong>${cate.categoryname}</strong></td>
                                 <td style="text-align: center;">
@@ -126,7 +166,7 @@
                                         <a class="btn-action btn-delete" href="<c:url value='/admin/category/delete?id=${cate.categoryid}'/>" onclick="return confirm('Bạn có chắc muốn xóa danh mục này?');">Xóa</a>
                                     </c:if>
                                     <c:if test="${sessionScope.account != null && sessionScope.account.roleid != 1}">
-                                        <span style="color: #6c757d; font-size: 13px;">Chỉ xem</span>
+                                        <span style="color: #64748b; font-size: 13px;">Chỉ xem</span>
                                     </c:if>
                                 </td>
                             </tr>
@@ -134,7 +174,7 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </main>
     </div>
 </body>
 </html>

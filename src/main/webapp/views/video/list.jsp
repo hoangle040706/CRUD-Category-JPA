@@ -7,84 +7,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${filter == 'my' ? 'Video của tôi' : 'Danh Sách Video'} - MyVideo Platform</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #f4f6f9; color: #333; }
-        .topbar { background: #343a40; color: #fff; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; }
-        .topbar .nav-links { display: flex; gap: 18px; align-items: center; }
-        .topbar a { color: #f8f9fa; text-decoration: none; font-size: 14px; font-weight: 500; }
-        .topbar a:hover { color: #007bff; }
-        .container { max-width: 1140px; margin: 30px auto; padding: 0 15px; }
-        .header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-        h1 { color: #2c3e50; font-size: 24px; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #e0e0e0; }
-        .tab-item { padding: 10px 20px; text-decoration: none; font-weight: 600; font-size: 14px; color: #666; border-bottom: 3px solid transparent; margin-bottom: -2px; }
-        .tab-item.active { color: #007bff; border-bottom-color: #007bff; }
-        .btn-upload { background: #28a745; color: #fff; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 14px; }
-        .btn-upload:hover { background: #218838; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+        body { background-color: #f8fafc; color: #0f172a; line-height: 1.5; }
+
+        /* Unified Topbar */
+        .topbar { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%); color: #fff; box-shadow: 0 2px 10px rgba(30, 58, 138, 0.15); position: sticky; top: 0; z-index: 100; }
+        .topbar-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; height: 60px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand-group { display: flex; align-items: center; gap: 28px; }
+        .brand-logo { color: #ffffff; font-size: 18px; font-weight: 700; text-decoration: none; letter-spacing: -0.3px; }
+        .nav-menu { display: flex; gap: 6px; align-items: center; }
+        .nav-link { color: #e0e7ff; text-decoration: none; font-size: 14px; font-weight: 500; padding: 7px 12px; border-radius: 6px; transition: all 0.15s ease; }
+        .nav-link:hover { background: rgba(255, 255, 255, 0.14); color: #ffffff; }
+        .nav-link.active { background: rgba(255, 255, 255, 0.22); color: #ffffff; font-weight: 600; }
+        .nav-link-badge { border: 1px solid rgba(255, 255, 255, 0.3); }
+
+        .nav-user-group { display: flex; align-items: center; gap: 14px; }
+        .user-greeting { display: flex; align-items: center; gap: 8px; }
+        .user-name { color: #ffffff; font-weight: 600; font-size: 14px; }
+        .user-role-pill { background: rgba(255, 255, 255, 0.2); color: #ffffff; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .btn-nav { color: #ffffff; text-decoration: none; padding: 6px 12px; font-weight: 600; font-size: 14px; border-radius: 6px; transition: all 0.15s; }
+        .btn-nav:hover { background: rgba(255, 255, 255, 0.14); }
+        .btn-nav-primary { background: #ffffff; color: #1d4ed8; }
+        .btn-nav-primary:hover { background: #eff6ff; color: #1e3a8a; }
+        .btn-logout { background: rgba(239, 68, 68, 0.9); color: #ffffff; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.15s; }
+        .btn-logout:hover { background: #dc2626; }
+
+        /* Container */
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+        h1 { color: #1e3a8a; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+        .btn-upload { background: #2563eb; color: #fff; padding: 9px 18px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; transition: background 0.15s; }
+        .btn-upload:hover { background: #1d4ed8; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 8px; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; }
+        .tab-item { padding: 10px 18px; text-decoration: none; font-weight: 600; font-size: 14px; color: #64748b; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+        .tab-item:hover { color: #2563eb; }
+        .tab-item.active { color: #2563eb; border-bottom-color: #2563eb; }
 
         /* Video Grid (6 videos / page) */
-        .video-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 30px; }
+        .video-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 35px; }
         @media (max-width: 900px) { .video-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 560px) { .video-grid { grid-template-columns: 1fr; } }
 
-        .video-card { background: #fff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .video-poster { position: relative; width: 100%; padding-top: 56.25%; background: #000; }
+        .video-card { background: #fff; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: transform 0.18s, box-shadow 0.18s; }
+        .video-card:hover { transform: translateY(-3px); box-shadow: 0 10px 18px -3px rgba(37, 99, 235, 0.12); border-color: #bfdbfe; }
+        .video-poster { position: relative; width: 100%; padding-top: 56.25%; background: #0f172a; }
         .video-poster img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        .video-body { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
-        .video-title { font-size: 15px; font-weight: bold; color: #1a0dab; text-decoration: none; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35; }
-        .video-title:hover { color: #d93025; text-decoration: underline; }
-        .video-desc { font-size: 12px; color: #666; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .video-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #888; border-top: 1px solid #f0f0f0; padding-top: 10px; }
-        .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .badge-success { background: #d4edda; color: #155724; }
-        .badge-warning { background: #fff3cd; color: #856404; }
-        .badge-source { background: #e2e3e5; color: #383d41; }
-        .actions { margin-top: 10px; display: flex; gap: 8px; }
-        .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 3px; text-decoration: none; font-weight: bold; cursor: pointer; border: none; }
-        .btn-edit { background: #ffc107; color: #212529; }
-        .btn-del { background: #dc3545; color: #fff; }
+        .video-body { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; }
+        .video-title { font-size: 15px; font-weight: 600; color: #0f172a; text-decoration: none; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+        .video-title:hover { color: #2563eb; }
+        .video-desc { font-size: 13px; color: #64748b; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.45; }
+        .video-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #64748b; border-top: 1px solid #f1f5f9; padding-top: 10px; }
+        
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .badge-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .badge-warning { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .badge-source { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        
+        .actions { margin-top: 12px; display: flex; gap: 8px; padding-top: 10px; border-top: 1px dashed #e2e8f0; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 4px; text-decoration: none; font-weight: 600; cursor: pointer; border: none; }
+        .btn-edit { background: #f59e0b; color: #fff; }
+        .btn-edit:hover { background: #d97706; }
+        .btn-del { background: #ef4444; color: #fff; }
+        .btn-del:hover { background: #dc2626; }
 
         /* Pagination */
         .pagination { display: flex; justify-content: center; gap: 6px; margin: 30px 0; }
-        .page-link { display: inline-block; padding: 8px 14px; background: #fff; border: 1px solid #dee2e6; color: #007bff; text-decoration: none; border-radius: 4px; font-weight: 500; }
-        .page-link:hover { background: #e9ecef; }
-        .page-link.active { background: #007bff; color: #fff; border-color: #007bff; }
-        .page-link.disabled { color: #6c757d; pointer-events: none; background: #f8f9fa; }
-        .alert-success { background: #d4edda; color: #155724; padding: 12px; border-radius: 4px; margin-bottom: 20px; }
+        .page-link { display: inline-block; padding: 8px 14px; background: #fff; border: 1px solid #cbd5e1; color: #2563eb; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; transition: all 0.15s; }
+        .page-link:hover { background: #eff6ff; border-color: #93c5fd; }
+        .page-link.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+        .alert-success { background: #ecfdf5; color: #047857; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #a7f3d0; font-size: 14px; }
+        .empty-box { background: #fff; padding: 50px 20px; text-align: center; border-radius: 12px; border: 1px solid #e2e8f0; color: #64748b; }
     </style>
 </head>
 <body>
-    <div class="topbar">
-        <div class="nav-links">
-            <a href="${pageContext.request.contextPath}/home" style="font-size: 16px; font-weight: bold;">🎬 MyVideo Platform</a>
-            <a href="${pageContext.request.contextPath}/home">Trang chủ</a>
-            <a href="${pageContext.request.contextPath}/video">Tất cả Video</a>
-            <a href="${pageContext.request.contextPath}/admin/category/list">📁 Danh mục Sản phẩm</a>
-            <c:if test="${not empty sessionScope.account}">
-                <a href="${pageContext.request.contextPath}/video?filter=my">Video của tôi</a>
-                <a href="${pageContext.request.contextPath}/video/upload">➕ Đăng Video</a>
-            </c:if>
-            <c:if test="${sessionScope.account.roleid == 1}">
-                <a href="${pageContext.request.contextPath}/admin/home" style="color: #ffc107; font-weight: bold;">⚙️ Quản Trị Admin</a>
-                <a href="${pageContext.request.contextPath}/admin/videos" style="color: #28a745; font-weight: bold;">🎬 Duyệt Video Admin</a>
-            </c:if>
-            <c:if test="${sessionScope.account.roleid == 2}">
-                <a href="${pageContext.request.contextPath}/manager/home" style="color: #fd7e14; font-weight: bold;">📊 Dashboard Manager</a>
-            </c:if>
+    <header class="topbar">
+        <div class="topbar-container">
+            <div class="nav-brand-group">
+                <a href="${pageContext.request.contextPath}/home" class="brand-logo">MyVideo Platform</a>
+                <nav class="nav-menu">
+                    <a href="${pageContext.request.contextPath}/home" class="nav-link">Trang chủ</a>
+                    <a href="${pageContext.request.contextPath}/video" class="nav-link ${filter != 'my' ? 'active' : ''}">Tất cả Video</a>
+                    <a href="${pageContext.request.contextPath}/admin/category/list" class="nav-link">Danh mục</a>
+                    <c:if test="${not empty sessionScope.account}">
+                        <a href="${pageContext.request.contextPath}/video?filter=my" class="nav-link ${filter == 'my' ? 'active' : ''}">Video của tôi</a>
+                        <a href="${pageContext.request.contextPath}/video/upload" class="nav-link">Đăng Video</a>
+                    </c:if>
+                    <c:if test="${sessionScope.account.roleid == 1}">
+                        <a href="${pageContext.request.contextPath}/admin/home" class="nav-link nav-link-badge">Quản trị Admin</a>
+                        <a href="${pageContext.request.contextPath}/admin/videos" class="nav-link nav-link-badge">Duyệt Video</a>
+                    </c:if>
+                    <c:if test="${sessionScope.account.roleid == 2}">
+                        <a href="${pageContext.request.contextPath}/manager/home" class="nav-link nav-link-badge">Bảng điều khiển Manager</a>
+                    </c:if>
+                </nav>
+            </div>
+            <div class="nav-user-group">
+                <c:choose>
+                    <c:when test="${sessionScope.account == null}">
+                        <a href="${pageContext.request.contextPath}/login" class="btn-nav">Đăng nhập</a>
+                        <a href="${pageContext.request.contextPath}/register" class="btn-nav btn-nav-primary">Đăng ký</a>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="user-greeting">
+                            <span class="user-name"><c:out value="${sessionScope.account.fullName}" /></span>
+                            <span class="user-role-pill">
+                                <c:choose>
+                                    <c:when test="${sessionScope.account.roleid == 1}">Admin</c:when>
+                                    <c:when test="${sessionScope.account.roleid == 2}">Manager</c:when>
+                                    <c:otherwise>Thành viên</c:otherwise>
+                                </c:choose>
+                            </span>
+                        </div>
+                        <a href="${pageContext.request.contextPath}/logout" class="btn-logout">Đăng xuất</a>
+                    </c:otherwise>
+                </c:choose>
+            </div>
         </div>
-        <div>
-            <c:choose>
-                <c:when test="${sessionScope.account == null}">
-                    <a href="${pageContext.request.contextPath}/login">Đăng nhập</a> |
-                    <a href="${pageContext.request.contextPath}/register">Đăng ký</a>
-                </c:when>
-                <c:otherwise>
-                    <span>Xin chào: <b><c:out value="${sessionScope.account.fullName}" /></b></span> |
-                    <a href="${pageContext.request.contextPath}/logout">Đăng Xuất</a>
-                </c:otherwise>
-            </c:choose>
-        </div>
-    </div>
+    </header>
 
     <div class="container">
         <c:if test="${not empty param.msg}">
@@ -92,14 +133,14 @@
         </c:if>
 
         <div class="header-box">
-            <h1>${filter == 'my' ? '📁 Video Của Tôi' : '🎬 Danh Sách Tất Cả Video'} (Tổng cộng: ${totalVideos})</h1>
+            <h1>${filter == 'my' ? 'Video của tôi' : 'Tất cả Video'} (Tổng cộng: ${totalVideos})</h1>
             <c:if test="${not empty sessionScope.account}">
-                <a href="${pageContext.request.contextPath}/video/upload" class="btn-upload">➕ Đăng Video Mới</a>
+                <a href="${pageContext.request.contextPath}/video/upload" class="btn-upload">Đăng Video Mới</a>
             </c:if>
         </div>
 
         <div class="tabs">
-            <a href="${pageContext.request.contextPath}/video" class="tab-item ${filter != 'my' ? 'active' : ''}">Tất cả Video Công Khai</a>
+            <a href="${pageContext.request.contextPath}/video" class="tab-item ${filter != 'my' ? 'active' : ''}">Tất cả Video công khai</a>
             <c:if test="${not empty sessionScope.account}">
                 <a href="${pageContext.request.contextPath}/video?filter=my" class="tab-item ${filter == 'my' ? 'active' : ''}">Video của tôi</a>
             </c:if>
@@ -138,7 +179,7 @@
                                 </c:if>
 
                                 <div class="video-footer">
-                                    <span>👁️ <c:out value="${v.views}" /> lượt xem</span>
+                                    <span><c:out value="${v.views}" /> lượt xem</span>
                                     <span class="badge badge-source"><c:out value="${v.sourceType}" /></span>
                                 </div>
 
@@ -161,20 +202,20 @@
                 <c:if test="${totalPages > 1}">
                     <div class="pagination">
                         <c:if test="${currentPage > 1}">
-                            <a href="${pageContext.request.contextPath}/video?page=${currentPage - 1}&filter=${filter}" class="page-link">&laquo; Trước</a>
+                            <a href="${pageContext.request.contextPath}/video?page=${currentPage - 1}&filter=${filter}" class="page-link">Trước</a>
                         </c:if>
                         <c:forEach begin="1" end="${totalPages}" var="p">
                             <a href="${pageContext.request.contextPath}/video?page=${p}&filter=${filter}" class="page-link ${p == currentPage ? 'active' : ''}">${p}</a>
                         </c:forEach>
                         <c:if test="${currentPage < totalPages}">
-                            <a href="${pageContext.request.contextPath}/video?page=${currentPage + 1}&filter=${filter}" class="page-link">Sau &raquo;</a>
+                            <a href="${pageContext.request.contextPath}/video?page=${currentPage + 1}&filter=${filter}" class="page-link">Sau</a>
                         </c:if>
                     </div>
                 </c:if>
             </c:when>
             <c:otherwise>
-                <div style="background: #fff; padding: 40px; text-align: center; border-radius: 8px; color: #777;">
-                    <p style="font-size: 16px; margin-bottom: 15px;">Chưa có video nào hiển thị ở mục này.</p>
+                <div class="empty-box">
+                    <p style="font-size: 15px; margin-bottom: 16px;">Chưa có video nào hiển thị ở mục này.</p>
                     <c:if test="${not empty sessionScope.account}">
                         <a href="${pageContext.request.contextPath}/video/upload" class="btn-upload">Tải lên video đầu tiên</a>
                     </c:if>

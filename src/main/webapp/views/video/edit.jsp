@@ -7,61 +7,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chỉnh Sửa Video - MyVideo Platform</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #f4f6f9; color: #333; }
-        .topbar { background: #343a40; color: #fff; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; }
-        .topbar .nav-links { display: flex; gap: 18px; align-items: center; }
-        .topbar a { color: #f8f9fa; text-decoration: none; font-size: 14px; font-weight: 500; }
-        .topbar a:hover { color: #007bff; }
-        .container { max-width: 760px; margin: 35px auto; padding: 0 15px; }
-        .card { background: #fff; padding: 35px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        h1 { font-size: 22px; color: #2c3e50; margin-bottom: 25px; border-bottom: 2px solid #e9ecef; padding-bottom: 12px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+        body { background-color: #f8fafc; color: #0f172a; line-height: 1.5; }
+
+        /* Unified Topbar */
+        .topbar { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%); color: #fff; box-shadow: 0 2px 10px rgba(30, 58, 138, 0.15); position: sticky; top: 0; z-index: 100; }
+        .topbar-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; height: 60px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand-group { display: flex; align-items: center; gap: 28px; }
+        .brand-logo { color: #ffffff; font-size: 18px; font-weight: 700; text-decoration: none; letter-spacing: -0.3px; }
+        .nav-menu { display: flex; gap: 6px; align-items: center; }
+        .nav-link { color: #e0e7ff; text-decoration: none; font-size: 14px; font-weight: 500; padding: 7px 12px; border-radius: 6px; transition: all 0.15s ease; }
+        .nav-link:hover { background: rgba(255, 255, 255, 0.14); color: #ffffff; }
+        .nav-link.active { background: rgba(255, 255, 255, 0.22); color: #ffffff; font-weight: 600; }
+        .nav-link-badge { border: 1px solid rgba(255, 255, 255, 0.3); }
+
+        .nav-user-group { display: flex; align-items: center; gap: 14px; }
+        .user-greeting { display: flex; align-items: center; gap: 8px; }
+        .user-name { color: #ffffff; font-weight: 600; font-size: 14px; }
+        .user-role-pill { background: rgba(255, 255, 255, 0.2); color: #ffffff; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .btn-logout { background: rgba(239, 68, 68, 0.9); color: #ffffff; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.15s; }
+        .btn-logout:hover { background: #dc2626; }
+
+        /* Form Card */
+        .container { max-width: 760px; margin: 35px auto; padding: 0 20px; }
+        .card { background: #fff; padding: 32px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        h1 { font-size: 20px; font-weight: 700; color: #1e3a8a; margin-bottom: 22px; border-bottom: 2px solid #eff6ff; padding-bottom: 12px; letter-spacing: -0.3px; }
         .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #495057; }
-        input[type="text"], select, textarea { width: 100%; padding: 10px 14px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; outline: none; transition: border-color 0.15s; }
-        input[type="text"]:focus, select:focus, textarea:focus { border-color: #80bdff; box-shadow: 0 0 0 3px rgba(0,123,255,0.15); }
-        .radio-group { display: flex; gap: 20px; align-items: center; padding: 6px 0; }
-        .radio-label { display: flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer; }
-        .help-text { font-size: 12px; color: #6c757d; margin-top: 5px; }
-        .btn-group { display: flex; gap: 12px; margin-top: 30px; }
-        .btn { padding: 10px 22px; border-radius: 4px; font-weight: bold; font-size: 14px; cursor: pointer; border: none; text-decoration: none; text-align: center; }
-        .btn-warning { background: #ffc107; color: #212529; }
-        .btn-warning:hover { background: #e0a800; }
-        .btn-secondary { background: #6c757d; color: #fff; }
-        .btn-secondary:hover { background: #5a6268; }
-        .alert-danger { background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; margin-bottom: 20px; }
-        .alert-info { background-color: #d1ecf1; color: #0c5460; padding: 12px; border-radius: 4px; margin-bottom: 20px; }
+        label { display: block; margin-bottom: 7px; font-weight: 600; font-size: 14px; color: #334155; }
+        input[type="text"], select, textarea { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; transition: all 0.15s; color: #0f172a; background: #ffffff; }
+        input[type="text"]:focus, select:focus, textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18); }
+        .radio-group { display: flex; gap: 24px; align-items: center; padding: 6px 0; }
+        .radio-label { display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer; font-size: 14px; color: #334155; }
+        .help-text { font-size: 12px; color: #64748b; margin-top: 5px; }
+        .btn-group { display: flex; gap: 12px; margin-top: 28px; }
+        .btn { padding: 10px 22px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; text-decoration: none; text-align: center; transition: all 0.15s; }
+        .btn-primary { background: #2563eb; color: #fff; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-secondary { background: #64748b; color: #fff; }
+        .btn-secondary:hover { background: #475569; }
+        .alert-danger { background-color: #fef2f2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca; font-size: 14px; }
+        .alert-info { background-color: #eff6ff; color: #1e40af; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bfdbfe; font-size: 14px; }
         .current-preview { display: flex; gap: 15px; align-items: center; margin-top: 8px; }
-        .current-thumb { width: 120px; height: 70px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
+        .current-thumb { width: 120px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
     </style>
 </head>
 <body>
-    <div class="topbar">
-        <div class="nav-links">
-            <a href="${pageContext.request.contextPath}/home" style="font-size: 16px; font-weight: bold;">🎬 MyVideo Platform</a>
-            <a href="${pageContext.request.contextPath}/home">Trang chủ</a>
-            <a href="${pageContext.request.contextPath}/video">Tất cả Video</a>
-            <a href="${pageContext.request.contextPath}/admin/category/list">📁 Danh mục Sản phẩm</a>
-            <a href="${pageContext.request.contextPath}/video?filter=my">Video của tôi</a>
-            <c:if test="${sessionScope.account.roleid == 1}">
-                <a href="${pageContext.request.contextPath}/admin/home" style="color: #ffc107; font-weight: bold;">⚙️ Quản Trị Admin</a>
-            </c:if>
-            <c:if test="${sessionScope.account.roleid == 2}">
-                <a href="${pageContext.request.contextPath}/manager/home" style="color: #fd7e14; font-weight: bold;">📊 Dashboard Manager</a>
-            </c:if>
+    <header class="topbar">
+        <div class="topbar-container">
+            <div class="nav-brand-group">
+                <a href="${pageContext.request.contextPath}/home" class="brand-logo">MyVideo Platform</a>
+                <nav class="nav-menu">
+                    <a href="${pageContext.request.contextPath}/home" class="nav-link">Trang chủ</a>
+                    <a href="${pageContext.request.contextPath}/video" class="nav-link">Tất cả Video</a>
+                    <a href="${pageContext.request.contextPath}/admin/category/list" class="nav-link">Danh mục</a>
+                    <a href="${pageContext.request.contextPath}/video?filter=my" class="nav-link">Video của tôi</a>
+                    <a href="${pageContext.request.contextPath}/video/upload" class="nav-link">Đăng Video</a>
+                    <c:if test="${sessionScope.account.roleid == 1}">
+                        <a href="${pageContext.request.contextPath}/admin/home" class="nav-link nav-link-badge">Quản trị Admin</a>
+                        <a href="${pageContext.request.contextPath}/admin/videos" class="nav-link nav-link-badge">Duyệt Video</a>
+                    </c:if>
+                    <c:if test="${sessionScope.account.roleid == 2}">
+                        <a href="${pageContext.request.contextPath}/manager/home" class="nav-link nav-link-badge">Bảng điều khiển Manager</a>
+                    </c:if>
+                </nav>
+            </div>
+            <div class="nav-user-group">
+                <div class="user-greeting">
+                    <span class="user-name"><c:out value="${sessionScope.account.fullName}" /></span>
+                    <span class="user-role-pill">
+                        <c:choose>
+                            <c:when test="${sessionScope.account.roleid == 1}">Admin</c:when>
+                            <c:when test="${sessionScope.account.roleid == 2}">Manager</c:when>
+                            <c:otherwise>Thành viên</c:otherwise>
+                        </c:choose>
+                    </span>
+                </div>
+                <a href="${pageContext.request.contextPath}/logout" class="btn-logout">Đăng xuất</a>
+            </div>
         </div>
-        <div>
-            <span>Xin chào: <b><c:out value="${sessionScope.account.fullName}" /></b></span> |
-            <a href="${pageContext.request.contextPath}/logout">Đăng Xuất</a>
-        </div>
-    </div>
+    </header>
 
     <div class="container">
         <div class="card">
-            <h1>✏️ Chỉnh Sửa Video</h1>
+            <h1>Chỉnh Sửa Video</h1>
 
             <div class="alert-info">
-                ℹ️ Lưu ý: Khi bạn cập nhật video, hệ thống sẽ tự động chuyển trạng thái về <b>Chờ duyệt</b> để Admin kiểm duyệt lại nội dung.
+                Lưu ý: Khi bạn cập nhật video, hệ thống sẽ tự động chuyển trạng thái về <b>Chờ duyệt</b> để Admin kiểm duyệt lại nội dung.
             </div>
 
             <c:if test="${not empty error}">
@@ -73,7 +104,7 @@
                 <input type="hidden" name="videoId" value="${video.videoId}">
 
                 <div class="form-group">
-                    <label for="title">Tiêu đề Video <span style="color:red;">*</span></label>
+                    <label for="title">Tiêu đề Video <span style="color:#ef4444;">*</span></label>
                     <input type="text" id="title" name="title" required value="<c:out value="${video.title}" />" maxlength="500">
                 </div>
 
@@ -142,7 +173,7 @@
                 </div>
 
                 <div class="btn-group">
-                    <button type="submit" class="btn btn-warning">Lưu Thay Đổi</button>
+                    <button type="submit" class="btn btn-primary">Lưu Thay Đổi</button>
                     <a href="${pageContext.request.contextPath}/video?filter=my" class="btn btn-secondary">Hủy bỏ</a>
                 </div>
             </form>

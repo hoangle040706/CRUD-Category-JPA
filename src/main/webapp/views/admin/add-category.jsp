@@ -7,64 +7,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thêm Danh Mục Mới - Admin Dashboard</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #f0f2f5; color: #333; }
-        .topbar { background: #007bff; color: #fff; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; }
-        .topbar h2 { font-size: 20px; font-weight: 600; }
-        .topbar-right a { color: #fff; text-decoration: none; background: #dc3545; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: bold; margin-left: 10px; }
-        .main-container { display: flex; min-height: calc(100vh - 54px); }
-        .sidebar { width: 240px; background: #1e282c; color: #b8c7ce; padding: 20px 0; flex-shrink: 0; }
-        .user-panel { padding: 12px 20px; display: flex; align-items: center; border-bottom: 1px solid #374850; margin-bottom: 15px; }
-        .user-panel img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 12px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+        body { background-color: #f8fafc; color: #0f172a; line-height: 1.5; }
+
+        /* Unified Topbar */
+        .topbar { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%); color: #fff; box-shadow: 0 2px 10px rgba(30, 58, 138, 0.15); position: sticky; top: 0; z-index: 100; }
+        .topbar-container { max-width: 100%; margin: 0 auto; padding: 0 25px; height: 60px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand-group { display: flex; align-items: center; gap: 28px; }
+        .brand-logo { color: #ffffff; font-size: 18px; font-weight: 700; text-decoration: none; letter-spacing: -0.3px; }
+        .nav-subtitle { color: #bfdbfe; font-size: 13px; font-weight: 500; padding-left: 15px; border-left: 1px solid rgba(255, 255, 255, 0.25); }
+
+        .nav-user-group { display: flex; align-items: center; gap: 14px; }
+        .user-greeting { display: flex; align-items: center; gap: 8px; }
+        .user-name { color: #ffffff; font-weight: 600; font-size: 14px; }
+        .user-role-pill { background: rgba(255, 255, 255, 0.2); color: #ffffff; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .btn-logout { background: rgba(239, 68, 68, 0.9); color: #ffffff; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.15s; }
+        .btn-logout:hover { background: #dc2626; }
+
+        /* Main Container */
+        .main-container { display: flex; min-height: calc(100vh - 60px); }
+        .sidebar { width: 250px; background: #0f172a; color: #94a3b8; padding: 20px 0; flex-shrink: 0; display: flex; flex-direction: column; }
+        .user-panel { padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid #1e293b; margin-bottom: 15px; }
+        .user-panel img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; margin-right: 12px; border: 2px solid #3b82f6; }
+        .online-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; margin-right: 4px; }
+        .user-role-text { font-size: 12px; color: #93c5fd; display: flex; align-items: center; margin-top: 3px; }
+
         .sidebar-menu { list-style: none; }
-        .sidebar-menu li a { display: block; padding: 12px 20px; color: #b8c7ce; text-decoration: none; font-size: 14px; }
-        .sidebar-menu li a:hover, .sidebar-menu li.active a { background: #1a2226; color: #fff; border-left: 3px solid #007bff; }
-        .content { flex-grow: 1; padding: 25px 30px; }
-        .card { max-width: 650px; background: #fff; border-radius: 8px; padding: 30px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+        .sidebar-menu li a { display: block; padding: 12px 22px; color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.15s ease; border-left: 4px solid transparent; }
+        .sidebar-menu li a:hover { background: #1e293b; color: #60a5fa; }
+        .sidebar-menu li.active a { background: #2563eb; color: #ffffff; font-weight: 600; border-left-color: #93c5fd; }
+
+        /* Content Area */
+        .content { flex-grow: 1; padding: 30px; background-color: #f8fafc; }
+        .card { max-width: 680px; background: #fff; border-radius: 12px; padding: 32px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .card h2 { font-size: 18px; color: #1e3a8a; font-weight: 700; margin-bottom: 22px; border-bottom: 2px solid #eff6ff; padding-bottom: 12px; }
         .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #495057; }
-        input[type="text"], input[type="file"] { width: 100%; padding: 10px 14px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; outline: none; }
-        .radio-group { display: flex; gap: 20px; align-items: center; padding: 6px 0; }
-        .btn-group { display: flex; gap: 12px; margin-top: 25px; }
-        .btn { padding: 10px 20px; border-radius: 4px; font-weight: bold; font-size: 14px; cursor: pointer; border: none; text-decoration: none; }
-        .btn-success { background: #28a745; color: #fff; }
-        .btn-secondary { background: #6c757d; color: #fff; }
+        label { display: block; margin-bottom: 7px; font-weight: 600; font-size: 14px; color: #334155; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; transition: all 0.15s; color: #0f172a; background: #ffffff; }
+        input[type="text"]:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18); }
+        .radio-group { display: flex; gap: 24px; align-items: center; padding: 6px 0; }
+        .radio-label { display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer; font-size: 14px; color: #334155; }
+        .btn-group { display: flex; gap: 12px; margin-top: 28px; }
+        .btn { padding: 10px 22px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; text-decoration: none; transition: all 0.15s; }
+        .btn-primary { background: #2563eb; color: #fff; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-secondary { background: #64748b; color: #fff; }
+        .btn-secondary:hover { background: #475569; }
     </style>
 </head>
 <body>
-    <div class="topbar">
-        <h2>📁 Quản Trị Danh Mục - Thêm Mới</h2>
-        <div class="topbar-right">
-            <span>Xin chào, <strong>${sessionScope.account != null ? sessionScope.account.username : 'Admin'}</strong></span>
-            <a href="<c:url value='/logout' />">Đăng xuất</a>
+    <header class="topbar">
+        <div class="topbar-container">
+            <div class="nav-brand-group">
+                <a href="${pageContext.request.contextPath}/home" class="brand-logo">MyVideo Platform</a>
+                <span class="nav-subtitle">Quản Trị Danh Mục - Thêm Mới</span>
+            </div>
+            <div class="nav-user-group">
+                <div class="user-greeting">
+                    <span class="user-name"><c:out value="${sessionScope.account != null ? sessionScope.account.username : 'Admin'}" /></span>
+                    <span class="user-role-pill">Admin</span>
+                </div>
+                <a href="<c:url value='/logout' />" class="btn-logout">Đăng xuất</a>
+            </div>
         </div>
-    </div>
+    </header>
 
     <div class="main-container">
-        <div class="sidebar">
+        <aside class="sidebar">
             <div class="user-panel">
                 <c:url value="/image?fname=${sessionScope.account != null && not empty sessionScope.account.avatar ? sessionScope.account.avatar : 'admin.png'}" var="userAvatar" />
-                <img src="${userAvatar}" alt="User Avatar">
+                <img src="${userAvatar}" alt="Admin Avatar">
                 <div>
-                    <div style="font-size: 13px; font-weight: bold; color: #fff;"><c:out value="${sessionScope.account != null ? sessionScope.account.userName : 'admin'}" /></div>
-                    <small style="color: #28a745;">● Trực tuyến</small>
+                    <div style="font-size: 14px; font-weight: 600; color: #ffffff;"><c:out value="${sessionScope.account != null ? sessionScope.account.userName : 'admin'}" /></div>
+                    <div class="user-role-text"><span class="online-dot"></span> Trực tuyến</div>
                 </div>
             </div>
             <ul class="sidebar-menu">
-                <li><a href="${pageContext.request.contextPath}/admin/home">📊 Tổng Quan Dashboard</a></li>
-                <li><a href="${pageContext.request.contextPath}/admin/videos">🎬 Quản Lý Video & Duyệt Clip</a></li>
-                <li class="active"><a href="${pageContext.request.contextPath}/admin/category/list">📁 Quản Lý Danh Mục</a></li>
-                <li><a href="${pageContext.request.contextPath}/video">🎥 Kho Video Người Dùng</a></li>
-                <li><a href="${pageContext.request.contextPath}/home">🌐 Về Trang Chủ Web</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/home">Tổng quan Dashboard</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/videos">Quản lý Video</a></li>
+                <li class="active"><a href="${pageContext.request.contextPath}/admin/category/list">Quản lý Danh mục</a></li>
+                <li><a href="${pageContext.request.contextPath}/video">Kho Video người dùng</a></li>
+                <li><a href="${pageContext.request.contextPath}/home">Trang chủ Web</a></li>
             </ul>
-        </div>
+        </aside>
 
-        <div class="content">
+        <main class="content">
             <div class="card">
-                <h3 style="margin-bottom: 20px; border-bottom: 1px solid #dee2e6; padding-bottom: 10px;">Thêm Danh Mục Sản Phẩm Mới</h3>
+                <h2>Thêm Danh Mục Sản Phẩm Mới</h2>
                 <form action="<c:url value='/admin/category/insert'/>" method="post" enctype="multipart/form-data">
                     <div class="form-group">
-                        <label for="categoryname">Tên Danh Mục <span style="color:red;">*</span></label>
+                        <label for="categoryname">Tên Danh Mục <span style="color:#ef4444;">*</span></label>
                         <input type="text" id="categoryname" name="categoryname" required placeholder="Nhập tên danh mục..." />
                     </div>
 
@@ -81,18 +113,18 @@
                     <div class="form-group">
                         <label>Trạng thái:</label>
                         <div class="radio-group">
-                            <label><input type="radio" id="ston" name="status" value="1" checked /> Hoạt động</label>
-                            <label><input type="radio" id="stoff" name="status" value="0" /> Khóa</label>
+                            <label class="radio-label"><input type="radio" id="ston" name="status" value="1" checked /> Hoạt động</label>
+                            <label class="radio-label"><input type="radio" id="stoff" name="status" value="0" /> Khóa</label>
                         </div>
                     </div>
 
                     <div class="btn-group">
-                        <button type="submit" class="btn btn-success">Lưu Danh Mục</button>
+                        <button type="submit" class="btn btn-primary">Lưu Danh Mục</button>
                         <a href="<c:url value='/admin/category/list'/>" class="btn btn-secondary">Hủy bỏ</a>
                     </div>
                 </form>
             </div>
-        </div>
+        </main>
     </div>
 </body>
 </html>

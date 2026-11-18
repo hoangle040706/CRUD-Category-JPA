@@ -7,78 +7,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Video - Admin Dashboard</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #f0f2f5; color: #333; }
-        .topbar { background: #007bff; color: #fff; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; }
-        .topbar h2 { font-size: 20px; font-weight: 600; }
-        .topbar-right a { color: #fff; text-decoration: none; background: #dc3545; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: bold; margin-left: 10px; }
-        .main-container { display: flex; min-height: calc(100vh - 54px); }
-        .sidebar { width: 230px; background: #1e282c; color: #b8c7ce; padding: 20px 0; flex-shrink: 0; }
-        .user-panel { padding: 12px 20px; display: flex; align-items: center; border-bottom: 1px solid #374850; margin-bottom: 15px; }
-        .user-panel img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 12px; }
-        .sidebar-menu { list-style: none; }
-        .sidebar-menu li a { display: block; padding: 12px 20px; color: #b8c7ce; text-decoration: none; font-size: 14px; }
-        .sidebar-menu li a:hover, .sidebar-menu li.active a { background: #1a2226; color: #fff; border-left: 3px solid #007bff; }
-        .content { flex-grow: 1; padding: 25px 30px; overflow-x: auto; }
-        .card { background: #fff; border-radius: 8px; padding: 25px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-        .btn-add { background: #28a745; color: #fff; padding: 9px 18px; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 14px; }
-        .btn-add:hover { background: #218838; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+        body { background-color: #f8fafc; color: #0f172a; line-height: 1.5; }
 
+        /* Unified Topbar */
+        .topbar { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%); color: #fff; box-shadow: 0 2px 10px rgba(30, 58, 138, 0.15); position: sticky; top: 0; z-index: 100; }
+        .topbar-container { max-width: 100%; margin: 0 auto; padding: 0 25px; height: 60px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand-group { display: flex; align-items: center; gap: 28px; }
+        .brand-logo { color: #ffffff; font-size: 18px; font-weight: 700; text-decoration: none; letter-spacing: -0.3px; }
+        .nav-subtitle { color: #bfdbfe; font-size: 13px; font-weight: 500; padding-left: 15px; border-left: 1px solid rgba(255, 255, 255, 0.25); }
+
+        .nav-user-group { display: flex; align-items: center; gap: 14px; }
+        .user-greeting { display: flex; align-items: center; gap: 8px; }
+        .user-name { color: #ffffff; font-weight: 600; font-size: 14px; }
+        .user-role-pill { background: rgba(255, 255, 255, 0.2); color: #ffffff; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .btn-logout { background: rgba(239, 68, 68, 0.9); color: #ffffff; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.15s; }
+        .btn-logout:hover { background: #dc2626; }
+
+        /* Main Container */
+        .main-container { display: flex; min-height: calc(100vh - 60px); }
+        .sidebar { width: 250px; background: #0f172a; color: #94a3b8; padding: 20px 0; flex-shrink: 0; display: flex; flex-direction: column; }
+        .user-panel { padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid #1e293b; margin-bottom: 15px; }
+        .user-panel img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; margin-right: 12px; border: 2px solid #3b82f6; }
+        .online-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; margin-right: 4px; }
+        .user-role-text { font-size: 12px; color: #93c5fd; display: flex; align-items: center; margin-top: 3px; }
+
+        .sidebar-menu { list-style: none; }
+        .sidebar-menu li a { display: block; padding: 12px 22px; color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.15s ease; border-left: 4px solid transparent; }
+        .sidebar-menu li a:hover { background: #1e293b; color: #60a5fa; }
+        .sidebar-menu li.active a { background: #2563eb; color: #ffffff; font-weight: 600; border-left-color: #93c5fd; }
+
+        /* Content Area */
+        .content { flex-grow: 1; padding: 30px; background-color: #f8fafc; overflow-x: auto; }
+        .card { background: #fff; border-radius: 12px; padding: 26px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 16px; }
+        .card-header h2 { font-size: 18px; color: #1e3a8a; font-weight: 700; }
+        .btn-add { background: #2563eb; color: #fff; padding: 9px 18px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; transition: background 0.15s; }
+        .btn-add:hover { background: #1d4ed8; }
+
+        /* Table */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #dee2e6; font-size: 14px; vertical-align: middle; }
-        th { background-color: #f8f9fa; color: #495057; font-weight: 600; }
+        th, td { padding: 13px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; vertical-align: middle; }
+        th { background-color: #f1f5f9; color: #334155; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
         tr:hover { background-color: #f8fafc; }
-        .poster-thumb { width: 80px; height: 48px; object-fit: cover; border-radius: 4px; background: #000; }
-        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .badge-active { background: #d4edda; color: #155724; }
-        .badge-locked { background: #f8d7da; color: #721c24; }
-        .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 3px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; }
-        .btn-edit { background: #ffc107; color: #212529; }
-        .btn-del { background: #dc3545; color: #fff; }
-        .btn-toggle { background: #6c757d; color: #fff; }
+        .poster-thumb { width: 80px; height: 48px; object-fit: cover; border-radius: 6px; background: #0f172a; }
+        
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .badge-active { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; cursor: pointer; }
+        .badge-locked { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; cursor: pointer; }
+        
+        .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 4px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; transition: all 0.15s; }
+        .btn-edit { background: #f59e0b; color: #fff; }
+        .btn-edit:hover { background: #d97706; }
+        .btn-del { background: #ef4444; color: #fff; }
+        .btn-del:hover { background: #dc2626; }
+        
         .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 25px; }
-        .page-link { display: inline-block; padding: 7px 12px; background: #fff; border: 1px solid #dee2e6; color: #007bff; text-decoration: none; border-radius: 4px; font-size: 13px; }
-        .page-link.active { background: #007bff; color: #fff; border-color: #007bff; }
-        .alert-success { background: #d4edda; color: #155724; padding: 12px; border-radius: 4px; margin-bottom: 20px; }
+        .page-link { display: inline-block; padding: 7px 13px; background: #fff; border: 1px solid #cbd5e1; color: #2563eb; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 600; transition: all 0.15s; }
+        .page-link:hover { background: #eff6ff; }
+        .page-link.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+        .alert-success { background: #ecfdf5; color: #047857; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #a7f3d0; font-size: 14px; }
     </style>
 </head>
 <body>
-    <div class="topbar">
-        <h2>🎬 Quản Lý Video Hệ Thống</h2>
-        <div class="topbar-right">
-            <span>Xin chào <b><c:out value="${sessionScope.account != null ? sessionScope.account.fullName : 'Admin'}" /></b></span>
-            <a href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
+    <header class="topbar">
+        <div class="topbar-container">
+            <div class="nav-brand-group">
+                <a href="${pageContext.request.contextPath}/home" class="brand-logo">MyVideo Platform</a>
+                <span class="nav-subtitle">Quản Lý Video Hệ Thống</span>
+            </div>
+            <div class="nav-user-group">
+                <div class="user-greeting">
+                    <span class="user-name"><c:out value="${sessionScope.account != null ? sessionScope.account.fullName : 'Admin'}" /></span>
+                    <span class="user-role-pill">Admin</span>
+                </div>
+                <a href="${pageContext.request.contextPath}/logout" class="btn-logout">Đăng xuất</a>
+            </div>
         </div>
-    </div>
+    </header>
 
     <div class="main-container">
-        <div class="sidebar">
+        <aside class="sidebar">
             <div class="user-panel">
                 <c:url value="/image?fname=${sessionScope.account != null && not empty sessionScope.account.avatar ? sessionScope.account.avatar : 'admin.png'}" var="userAvatar" />
-                <img src="${userAvatar}" alt="User Avatar">
+                <img src="${userAvatar}" alt="Admin Avatar">
                 <div>
-                    <div style="font-size: 13px; font-weight: bold; color: #fff;"><c:out value="${sessionScope.account != null ? sessionScope.account.userName : 'admin'}" /></div>
-                    <small style="color: #28a745;">Trực tuyến</small>
+                    <div style="font-size: 14px; font-weight: 600; color: #ffffff;"><c:out value="${sessionScope.account != null ? sessionScope.account.userName : 'admin'}" /></div>
+                    <div class="user-role-text"><span class="online-dot"></span> Quản trị viên (Role: 1)</div>
                 </div>
             </div>
             <ul class="sidebar-menu">
-                <li><a href="${pageContext.request.contextPath}/admin/home">📊 Dashboard</a></li>
-                <li class="active"><a href="${pageContext.request.contextPath}/admin/videos">🎬 Quản lý Video</a></li>
-                <li><a href="${pageContext.request.contextPath}/admin/category/list">📁 Quản lý Danh mục</a></li>
-                <li><a href="${pageContext.request.contextPath}/home">🌐 Về Trang Chủ Web</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/home">Tổng quan Dashboard</a></li>
+                <li class="active"><a href="${pageContext.request.contextPath}/admin/videos">Quản lý Video</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/category/list">Quản lý Danh mục</a></li>
+                <li><a href="${pageContext.request.contextPath}/video">Kho Video người dùng</a></li>
+                <li><a href="${pageContext.request.contextPath}/home">Trang chủ Web</a></li>
             </ul>
-        </div>
+        </aside>
 
-        <div class="content">
+        <main class="content">
             <c:if test="${not empty param.msg}">
                 <div class="alert-success">Thao tác dữ liệu video thành công!</div>
             </c:if>
 
             <div class="card">
                 <div class="card-header">
-                    <h3>Danh Sách Tất Cả Video (${totalVideos})</h3>
-                    <a href="${pageContext.request.contextPath}/admin/video/add" class="btn-add">➕ Thêm Video Mới</a>
+                    <h2>Danh Sách Tất Cả Video (${totalVideos})</h2>
+                    <a href="${pageContext.request.contextPath}/admin/video/add" class="btn-add">Thêm Video Mới</a>
                 </div>
 
                 <table>
@@ -111,13 +146,13 @@
                                     </c:choose>
                                 </td>
                                 <td>
-                                    <a href="${pageContext.request.contextPath}/video/detail?id=${v.videoId}" target="_blank" style="font-weight: bold; color: #007bff; text-decoration: none;">
+                                    <a href="${pageContext.request.contextPath}/video/detail?id=${v.videoId}" target="_blank" style="font-weight: 600; color: #2563eb; text-decoration: none;">
                                         <c:out value="${v.title}" />
                                     </a>
-                                    <div style="font-size: 11px; color: #888;">ID: <c:out value="${v.videoId}" /></div>
+                                    <div style="font-size: 12px; color: #64748b; margin-top: 2px;">ID: <c:out value="${v.videoId}" /></div>
                                 </td>
                                 <td><c:out value="${v.category != null ? v.category.categoryname : 'Chung'}" /></td>
-                                <td><span class="badge" style="background:#e9ecef;"><c:out value="${v.sourceType}" /></span></td>
+                                <td><span class="badge" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;"><c:out value="${v.sourceType}" /></span></td>
                                 <td><c:out value="${v.user != null ? v.user.fullName : 'Admin'}" /></td>
                                 <td><c:out value="${v.views}" /></td>
                                 <td>
@@ -126,12 +161,12 @@
                                         <input type="hidden" name="id" value="${v.videoId}">
                                         <input type="hidden" name="active" value="${v.active == 1 ? 0 : 1}">
                                         <button type="submit" class="btn-sm ${v.active == 1 ? 'badge-active' : 'badge-locked'}" title="Nhấn để đổi trạng thái">
-                                            ${v.active == 1 ? '✅ Đã Duyệt' : '🔒 Khóa/Chờ'}
+                                            ${v.active == 1 ? 'Đã duyệt' : 'Chờ duyệt / Khóa'}
                                         </button>
                                     </form>
                                 </td>
                                 <td>
-                                    <div style="display: flex; gap: 6px;">
+                                    <div style="display: flex; gap: 8px;">
                                         <a href="${pageContext.request.contextPath}/admin/video/edit?id=${v.videoId}" class="btn-sm btn-edit">Sửa</a>
                                         <form method="post" action="${pageContext.request.contextPath}/admin/video/delete" onsubmit="return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn video này?');" style="display:inline;">
                                             <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
@@ -153,7 +188,7 @@
                     </div>
                 </c:if>
             </div>
-        </div>
+        </main>
     </div>
 </body>
 </html>

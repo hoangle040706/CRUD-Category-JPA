@@ -5,30 +5,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh Sách Danh Mục</title>
+    <title>Danh Sách Danh Mục - MyVideo Platform</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f6f9; }
-        .container { background: #fff; padding: 30px; border-radius: 8px; max-width: 850px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .user-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: bold; }
-        .badge-admin { background-color: #d1ecf1; color: #0c5460; }
-        .badge-user { background-color: #e2e3e5; color: #383d41; }
-        .btn { display: inline-block; padding: 8px 14px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px; }
-        .btn-success { background: #28a745; color: #fff; }
-        .btn-success:hover { background: #218838; }
-        .btn-warning { background: #ffc107; color: #212529; }
-        .btn-warning:hover { background: #e0a800; }
-        .btn-danger { background: #dc3545; color: #fff; }
-        .btn-danger:hover { background: #c82333; }
-        .btn-secondary { background: #6c757d; color: #fff; }
-        .btn-secondary:hover { background: #5a6268; }
-        .alert-danger { background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; margin-bottom: 16px; border: 1px solid #f5c6cb; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
-        th { background-color: #e9ecef; font-weight: bold; }
-        tr:nth-child(even) { background-color: #f8f9fa; }
-        .action-cell { white-space: nowrap; width: 140px; text-align: center; }
-        .empty-row { text-align: center; color: #888; font-style: italic; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+        body { background-color: #f8fafc; color: #0f172a; line-height: 1.5; padding: 30px 20px; }
+        .container { background: #fff; padding: 30px; border-radius: 12px; max-width: 900px; margin: 0 auto; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; border-bottom: 2px solid #eff6ff; padding-bottom: 16px; }
+        h1 { color: #1e3a8a; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        .user-status { font-size: 13px; color: #64748b; }
+        .user-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 6px; }
+        .badge-admin { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .badge-user { background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+        
+        .header-actions { display: flex; gap: 10px; }
+        .btn { display: inline-block; padding: 8px 16px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; transition: all 0.15s; }
+        .btn-primary { background: #2563eb; color: #fff; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-warning { background: #f59e0b; color: #fff; }
+        .btn-warning:hover { background: #d97706; }
+        .btn-danger { background: #ef4444; color: #fff; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-secondary { background: #64748b; color: #fff; }
+        .btn-secondary:hover { background: #475569; }
+        
+        .alert-danger { background-color: #fef2f2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca; font-size: 14px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border-bottom: 1px solid #e2e8f0; padding: 12px 14px; text-align: left; font-size: 14px; vertical-align: middle; }
+        th { background-color: #f1f5f9; color: #334155; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        tr:hover { background-color: #f8fafc; }
+        .action-cell { white-space: nowrap; width: 150px; text-align: center; }
+        .empty-row { text-align: center; color: #64748b; padding: 30px; font-style: italic; }
     </style>
 </head>
 <body>
@@ -40,17 +47,17 @@
 
         <div class="header">
             <div>
-                <h2 style="margin-bottom: 5px;">Quản Lý Danh Mục (Category)</h2>
-                <div>
-                    Xin chào <b>${sessionScope.account.username}</b> 
+                <h1>Quản Lý Danh Mục</h1>
+                <div class="user-status">
+                    Xin chào <b><c:out value="${sessionScope.account.username}" /></b> 
                     <span class="user-badge ${sessionScope.account.admin ? 'badge-admin' : 'badge-user'}">
-                        ${sessionScope.account.role}
+                        <c:out value="${sessionScope.account.role}" />
                     </span>
                 </div>
             </div>
-            <div>
+            <div class="header-actions">
                 <c:if test="${sessionScope.account.admin}">
-                    <a href="${pageContext.request.contextPath}/category/add" class="btn btn-success">+ Thêm Mới</a>
+                    <a href="${pageContext.request.contextPath}/category/add" class="btn btn-primary">Thêm Mới</a>
                 </c:if>
                 <a href="${pageContext.request.contextPath}/home" class="btn btn-secondary">Về Trang Chủ</a>
             </div>
@@ -59,7 +66,7 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 60px;">ID</th>
+                    <th style="width: 70px;">ID</th>
                     <th>Tên Danh Mục</th>
                     <th>Mô Tả</th>
                     <c:if test="${sessionScope.account.admin}">
@@ -72,15 +79,15 @@
                     <c:when test="${not empty categoryList}">
                         <c:forEach var="cat" items="${categoryList}">
                             <tr>
-                                <td>${cat.id}</td>
-                                <td><b>${cat.name}</b></td>
-                                <td>${cat.description}</td>
+                                <td><c:out value="${cat.id}" /></td>
+                                <td><b><c:out value="${cat.name}" /></b></td>
+                                <td><c:out value="${cat.description}" /></td>
                                 <c:if test="${sessionScope.account.admin}">
                                     <td class="action-cell">
-                                        <a href="${pageContext.request.contextPath}/category/edit?id=${cat.id}" class="btn btn-warning">Sửa</a>
+                                        <a href="${pageContext.request.contextPath}/category/edit?id=${cat.id}" class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;">Sửa</a>
                                         <a href="${pageContext.request.contextPath}/category/delete?id=${cat.id}" 
-                                           class="btn btn-danger" 
-                                           onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục &quot;${cat.name}&quot;?');">Xóa</a>
+                                           class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;"
+                                           onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">Xóa</a>
                                     </td>
                                 </c:if>
                             </tr>
