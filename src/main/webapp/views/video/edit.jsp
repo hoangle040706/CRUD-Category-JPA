@@ -41,7 +41,14 @@
             <a href="${pageContext.request.contextPath}/home" style="font-size: 16px; font-weight: bold;">🎬 MyVideo Platform</a>
             <a href="${pageContext.request.contextPath}/home">Trang chủ</a>
             <a href="${pageContext.request.contextPath}/video">Tất cả Video</a>
+            <a href="${pageContext.request.contextPath}/admin/category/list">📁 Danh mục Sản phẩm</a>
             <a href="${pageContext.request.contextPath}/video?filter=my">Video của tôi</a>
+            <c:if test="${sessionScope.account.roleid == 1}">
+                <a href="${pageContext.request.contextPath}/admin/home" style="color: #ffc107; font-weight: bold;">⚙️ Quản Trị Admin</a>
+            </c:if>
+            <c:if test="${sessionScope.account.roleid == 2}">
+                <a href="${pageContext.request.contextPath}/manager/home" style="color: #fd7e14; font-weight: bold;">📊 Dashboard Manager</a>
+            </c:if>
         </div>
         <div>
             <span>Xin chào: <b><c:out value="${sessionScope.account.fullName}" /></b></span> |
