@@ -62,6 +62,11 @@ public class User implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private java.util.Date rememberTokenExpiry;
 
+    @OneToMany(mappedBy = "user")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private java.util.List<Video> videos;
+
     public int getId() {
         return id;
     }
@@ -220,6 +225,14 @@ public class User implements Serializable {
 
     public void setRememberTokenExpiry(java.util.Date rememberTokenExpiry) {
         this.rememberTokenExpiry = rememberTokenExpiry;
+    }
+
+    public java.util.List<Video> getVideos() {
+        return videos;
+    }
+
+    public void setVideos(java.util.List<Video> videos) {
+        this.videos = videos;
     }
 
     public String getRoleName() {

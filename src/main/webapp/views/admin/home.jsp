@@ -52,6 +52,7 @@
             </div>
             <ul class="sidebar-menu">
                 <li class="active"><a href="${pageContext.request.contextPath}/admin/home">📊 Dashboard</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/videos">🎬 Quản lý Video</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/category/list">📁 Quản lý Danh mục</a></li>
                 <li><a href="${pageContext.request.contextPath}/home">🌐 Về Trang Chủ Web</a></li>
             </ul>

@@ -33,6 +33,14 @@ public class Constant {
     public static final String DIR = resolveUploadDir();
     public static final String UPLOAD_DIRECTORY = DIR;
     public static final String DEFAULT_FILENAME = "default.png";
+    public static final String DEFAULT_POSTER = "default-poster.jpg";
+
+    public static final long MAX_POSTER_SIZE = 5L * 1024 * 1024; // 5MB
+    public static final long MAX_VIDEO_SIZE = 200L * 1024 * 1024; // 200MB
+    public static final long MAX_REQUEST_SIZE = 250L * 1024 * 1024; // 250MB
+    public static final int PAGE_SIZE_VIDEO = 6;
+
+    private static volatile String customUploadDir = null;
 
     public static class Path {
         public static final String REGISTER = "/views/register.jsp";
@@ -46,7 +54,56 @@ public class Constant {
 
     public static final String REGISTER = Path.REGISTER;
 
+    public static String getUploadDir() {
+        return customUploadDir != null ? customUploadDir : DIR;
+    }
+
+    public static String getPosterDir() {
+        String base = getUploadDir();
+        String posterPath = base + File.separator + "posters";
+        File dir = new File(posterPath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return posterPath;
+    }
+
+    public static String getVideoDir() {
+        String base = getUploadDir();
+        String videoPath = base + File.separator + "videos";
+        File dir = new File(videoPath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return videoPath;
+    }
+
+    public static synchronized void setCustomUploadDirForTest(String path) {
+        if (path == null) {
+            customUploadDir = null;
+            return;
+        }
+        File f = new File(path);
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        customUploadDir = f.getAbsolutePath();
+        new File(customUploadDir + File.separator + "posters").mkdirs();
+        new File(customUploadDir + File.separator + "videos").mkdirs();
+    }
+
+    public static synchronized void resetUploadDirForTest() {
+        customUploadDir = null;
+    }
+
     private static String resolveUploadDir() {
+        String customEnv = System.getenv("UPLOAD_DIR");
+        if (customEnv != null && !customEnv.trim().isEmpty()) {
+            File f = new File(customEnv.trim());
+            if (f.exists() || f.mkdirs()) {
+                return f.getAbsolutePath();
+            }
+        }
         String os = System.getProperty("os.name", "").toLowerCase();
         if (os.contains("win")) {
             File eDir = new File("E:\\upload");
@@ -69,6 +126,8 @@ public class Constant {
         if (!dir.exists()) {
             dir.mkdirs();
         }
+        new File(homeDir + File.separator + "posters").mkdirs();
+        new File(homeDir + File.separator + "videos").mkdirs();
         return homeDir;
     }
 }

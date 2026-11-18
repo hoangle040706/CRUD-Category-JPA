@@ -32,6 +32,8 @@ public class Category implements Serializable {
     private int status;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Video> videos = new ArrayList<>();
 
     public Video addVideo(Video video) {

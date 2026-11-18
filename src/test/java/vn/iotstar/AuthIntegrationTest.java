@@ -24,6 +24,7 @@ public class AuthIntegrationTest {
 
     @BeforeAll
     public static void setUp() {
+        TestBootstrapHelper.ensureTestDatabaseReady();
         System.setProperty("APP_DEV_MODE", "true");
         userDao = new UserDao();
         userService = new UserServiceImpl();
