@@ -1,22 +1,6 @@
-# Nền Tảng Quản Lý Video & Danh Mục Sản Phẩm (MyVideo Platform)
-> **Môn học:** Lập trình Web với Java & Jakarta EE  
-> **Giảng viên hướng dẫn:** ThS. Nguyễn Hữu Trung - HCMUTE  
-> **Sinh viên thực hiện:** Lê Minh Hoàng  
-> **Công nghệ:** Jakarta EE 10 (Servlet 6.1, JSP 4.0), Hibernate ORM 7.x (JPA 3.0), SiteMesh 3, Bootstrap 5.3, MySQL 8.x, Apache Tomcat 10/11
-
----
-
 ## 1. Tổng Quan Dự Án
 
 **MyVideo Platform** là ứng dụng web quản lý nội dung đa phương tiện và danh mục sản phẩm hoàn chỉnh, xây dựng theo mô hình kiến trúc đa tầng **MVC (Model - View - Controller)** kết hợp **DAO - Service Pattern**, công nghệ ánh xạ quan hệ đối tượng **JPA 3.0 (Jakarta Persistence)**, hệ thống giao diện trang trí **SiteMesh Decorator 3** trên nền tảng **Bootstrap 5.3**, cùng cơ chế **Validation 2 lớp (Client & Server)** toàn diện.
-
-Hệ thống tích hợp đầy đủ 4 giai đoạn bài tập trọng tâm theo đúng tiến độ:
-1. **Bài tập 02:** Kiến trúc ORM JPA 3.0, kết nối Hibernate 7, cấu trúc DDL và CRUD Category & Video cơ bản.
-2. **Bài tập 16/11:** Xác thực bảo mật người dùng, mã hóa mật khẩu BCrypt, kích hoạt tài khoản & quên mật khẩu bằng OTP Email bất đồng bộ, Remember Me Token Rotation chống tấn công phát lại.
-3. **Mục 4 Bài tập:** Nâng cấp quan hệ bảng `videos` (1-N với `users`, N-1 với `categories`), CRUD Video hoàn chỉnh, phân trang 6 video/trang, Top 10 video trang chủ, Video Player (YouTube iframe & Local Stream MP4 HTTP Range), tự động trích xuất Thumbnail YouTube làm poster.
-4. **Bài tập 19/11 (Hoàn thành trước 16:00 ngày 19/11/2026):**
-   - Cấu hình **SiteMesh Decorator 3** với **Template Bootstrap 5.3** chuẩn doanh nghiệp, thống nhất Navbar responsive đa quyền và Footer HCMUTE trên toàn hệ thống.
-   - Triển khai **Validation 2 lớp toàn diện** cho tất cả các chức năng có FORM: Đăng nhập (`login`), Đăng ký (`register`), Quên mật khẩu (`forgot-password`), Đặt lại mật khẩu (`reset-password`), Xác thực OTP (`verify-otp`), Thêm/Sửa danh mục (`category`), Đăng tải/Sửa video (`video`).
 
 ---
 
