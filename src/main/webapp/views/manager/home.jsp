@@ -72,23 +72,7 @@
     </style>
 </head>
 <body>
-    <header class="topbar">
-        <div class="topbar-container">
-            <div class="nav-brand-group">
-                <a href="${pageContext.request.contextPath}/home" class="brand-logo">MyVideo Platform</a>
-                <span class="nav-subtitle">Khu Vực Quản Lý (Manager)</span>
-            </div>
-            <div class="nav-user-group">
-                <div class="user-greeting">
-                    <span class="user-name"><c:out value="${sessionScope.account != null ? sessionScope.account.fullName : 'Manager'}" /></span>
-                    <span class="user-role-pill">Manager</span>
-                </div>
-                <a href="${pageContext.request.contextPath}/logout" class="btn-logout">Đăng xuất</a>
-            </div>
-        </div>
-    </header>
-
-    <div class="main-container">
+<div class="main-container">
         <aside class="sidebar">
             <div class="user-panel">
                 <c:url value="/image?fname=${sessionScope.account != null && not empty sessionScope.account.avatar ? sessionScope.account.avatar : 'manager.png'}" var="userAvatar" />

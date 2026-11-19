@@ -19,6 +19,7 @@ import vn.iotstar.entity.Category;
 import vn.iotstar.service.CategoryServiceImpl;
 import vn.iotstar.service.ICategoryService;
 import vn.iotstar.util.Constant;
+import vn.iotstar.util.ValidationUtil;
 
 @MultipartConfig(
     fileSizeThreshold = 1024 * 1024 * 2,
@@ -82,6 +83,15 @@ public class CategoryController extends HttpServlet {
             }
             String images = req.getParameter("images");
 
+            // Server-side: validate categoryname (required, 2–255 chars)
+            if (categoryname == null || categoryname.trim().isEmpty()
+                    || categoryname.trim().length() < 2 || categoryname.trim().length() > 255) {
+                req.setAttribute("alert", "Tên danh mục phải từ 2 đến 255 ký tự!");
+                req.setAttribute("categoryname", categoryname != null ? categoryname.trim() : "");
+                req.getRequestDispatcher("/views/admin/category-add.jsp").forward(req, resp);
+                return;
+            }
+
             Category category = new Category();
             category.setCategoryname(categoryname);
             category.setStatus(status);
@@ -103,6 +113,13 @@ public class CategoryController extends HttpServlet {
                     }
                 }
                 if (part != null && part.getSize() > 0) {
+                    // Validate image file size ≤ 5 MB
+                    if (part.getSize() > Constant.MAX_POSTER_SIZE) {
+                        req.setAttribute("alert", "Ảnh danh mục không được vượt quá 5MB!");
+                        req.setAttribute("categoryname", categoryname.trim());
+                        req.getRequestDispatcher("/views/admin/category-add.jsp").forward(req, resp);
+                        return;
+                    }
                     String filename = Paths.get(part.getSubmittedFileName()).getFileName().toString();
                     int index = filename.lastIndexOf(".");
                     String ext = filename.substring(index + 1);
@@ -130,6 +147,16 @@ public class CategoryController extends HttpServlet {
             }
             String images = req.getParameter("images");
 
+            // Server-side: validate categoryname (required, 2–255 chars)
+            if (categoryname == null || categoryname.trim().isEmpty()
+                    || categoryname.trim().length() < 2 || categoryname.trim().length() > 255) {
+                req.setAttribute("alert", "Tên danh mục phải từ 2 đến 255 ký tự!");
+                Category cate = cateService.findById(categoryid);
+                req.setAttribute("cate", cate);
+                req.getRequestDispatcher("/views/admin/category-edit.jsp").forward(req, resp);
+                return;
+            }
+
             Category category = cateService.findById(categoryid);
             if (category != null) {
                 String fileold = category.getImages();
@@ -153,6 +180,14 @@ public class CategoryController extends HttpServlet {
                         }
                     }
                     if (part != null && part.getSize() > 0) {
+                        // Validate image file size ≤ 5 MB (update)
+                        if (part.getSize() > Constant.MAX_POSTER_SIZE) {
+                            req.setAttribute("alert", "Ảnh danh mục không được vượt quá 5MB!");
+                            category.setCategoryname(categoryname);
+                            req.setAttribute("cate", category);
+                            req.getRequestDispatcher("/views/admin/category-edit.jsp").forward(req, resp);
+                            return;
+                        }
                         if (fileold != null && !fileold.startsWith("http") && !fileold.equals(Constant.DEFAULT_FILENAME)) {
                             deleteFile(uploadPath + File.separator + fileold);
                         }

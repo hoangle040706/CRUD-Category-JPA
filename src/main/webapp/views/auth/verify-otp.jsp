@@ -8,32 +8,38 @@
     <title>Xác Thực Mã OTP - MyVideo Platform</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
-        body { background-color: #f8fafc; color: #0f172a; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        body { background-color: #f8fafc; color: #0f172a; }
+        .auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 160px); padding: 36px 16px; width: 100%; }
         .box { background: #fff; padding: 36px 32px; border-radius: 12px; width: 100%; max-width: 440px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
         .brand-header { text-align: center; margin-bottom: 15px; }
         .brand-title { color: #1e3a8a; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
         .subtitle { text-align: center; color: #64748b; font-size: 13px; margin-bottom: 24px; line-height: 1.5; }
-        
+
         .alert-danger { background-color: #fef2f2; color: #991b1b; padding: 11px 14px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; border: 1px solid #fecaca; text-align: center; }
         .alert-success { background-color: #ecfdf5; color: #047857; padding: 11px 14px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; border: 1px solid #a7f3d0; text-align: center; }
-        
+
         .form-group { margin-bottom: 22px; text-align: center; }
         .otp-input { width: 100%; padding: 12px 15px; font-size: 24px; text-align: center; letter-spacing: 8px; font-weight: 700; border: 2px solid #cbd5e1; border-radius: 8px; outline: none; transition: all 0.15s; color: #1e3a8a; }
         .otp-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18); }
-        
+        .form-control.is-invalid, .was-validated .form-control:invalid, .was-validated .otp-input:invalid { border-color: #ef4444; }
+        .invalid-feedback { display: none; color: #ef4444; font-size: 12px; margin-top: 4px; }
+        .was-validated .form-control:invalid ~ .invalid-feedback,
+        .was-validated .otp-input:invalid ~ .invalid-feedback { display: block; }
+
         .btn-submit { width: 100%; padding: 11px; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
         .btn-submit:hover { background: #1d4ed8; }
-        
+
         .resend-box { margin-top: 24px; text-align: center; font-size: 13px; color: #64748b; }
         .btn-resend { color: #2563eb; text-decoration: none; font-weight: 600; }
         .btn-resend.disabled { color: #94a3b8; pointer-events: none; cursor: default; }
-        
+
         .extra-links { margin-top: 20px; text-align: center; font-size: 13px; }
         .extra-links a { color: #64748b; text-decoration: none; }
         .extra-links a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
+    <div class="auth-wrapper">
     <div class="box">
         <div class="brand-header">
             <div class="brand-title">Xác Thực Tài Khoản</div>
@@ -51,9 +57,14 @@
             <div class="alert-danger">${alert}</div>
         </c:if>
 
-        <form action="${pageContext.request.contextPath}/verify-otp" method="post">
+        <form action="${pageContext.request.contextPath}/verify-otp" method="post"
+              class="needs-validation" novalidate>
             <div class="form-group">
-                <input type="text" name="otp" class="otp-input" maxlength="6" pattern="[0-9]{6}" placeholder="------" required autofocus />
+                <input type="text" name="otp" class="otp-input" maxlength="6" pattern="[0-9]{6}"
+                       placeholder="------"
+                       value="<c:out value='${not empty otp ? otp : param.otp}' />"
+                       required autofocus />
+                <div class="invalid-feedback">Vui lòng nhập mã OTP gồm 6 chữ số.</div>
             </div>
 
             <button type="submit" class="btn-submit">Xác nhận kích hoạt</button>
@@ -70,7 +81,9 @@
             <a href="${pageContext.request.contextPath}/login">&larr; Quay lại trang đăng nhập</a>
         </div>
     </div>
+    </div>
 
+    <script src="${pageContext.request.contextPath}/assets/js/form-validation.js"></script>
     <script>
         let timeLeft = 60;
         const timerElem = document.getElementById('timer');

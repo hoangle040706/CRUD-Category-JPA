@@ -63,26 +63,16 @@
         .btn-secondary { background: #64748b; color: #fff; }
         .btn-secondary:hover { background: #475569; }
         .alert-danger { background-color: #fef2f2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca; font-size: 14px; }
+        /* Validation feedback */
+        .invalid-feedback { display: none; color: #ef4444; font-size: 12px; margin-top: 4px; }
+        .was-validated input:invalid ~ .invalid-feedback,
+        .was-validated select:invalid ~ .invalid-feedback { display: block; }
+        .was-validated input:invalid,
+        .was-validated select:invalid { border-color: #ef4444; }
     </style>
 </head>
 <body>
-    <header class="topbar">
-        <div class="topbar-container">
-            <div class="nav-brand-group">
-                <a href="${pageContext.request.contextPath}/home" class="brand-logo">MyVideo Platform</a>
-                <span class="nav-subtitle">Quản Trị Video - Thêm Video</span>
-            </div>
-            <div class="nav-user-group">
-                <div class="user-greeting">
-                    <span class="user-name"><c:out value="${sessionScope.account != null ? sessionScope.account.fullName : 'Admin'}" /></span>
-                    <span class="user-role-pill">Admin</span>
-                </div>
-                <a href="${pageContext.request.contextPath}/logout" class="btn-logout">Đăng xuất</a>
-            </div>
-        </div>
-    </header>
-
-    <div class="main-container">
+<div class="main-container">
         <aside class="sidebar">
             <div class="user-panel">
                 <c:url value="/image?fname=${sessionScope.account != null && not empty sessionScope.account.avatar ? sessionScope.account.avatar : 'admin.png'}" var="userAvatar" />
@@ -109,32 +99,40 @@
                     <div class="alert-danger"><c:out value="${error}" /></div>
                 </c:if>
 
-                <form method="post" action="${pageContext.request.contextPath}/admin/video/insert" enctype="multipart/form-data">
+                <form method="post" action="${pageContext.request.contextPath}/admin/video/insert" enctype="multipart/form-data"
+                      class="needs-validation" novalidate>
                     <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
 
                     <div class="form-group">
                         <label for="title">Tiêu đề Video <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="title" name="title" required placeholder="Nhập tiêu đề video..." maxlength="500">
+                        <input type="text" id="title" name="title" required
+                               placeholder="Nhập tiêu đề video..." maxlength="500"
+                               value="<c:out value='${not empty title ? title : param.title}' />">
+                        <div class="invalid-feedback">Tiêu đề video không được để trống.</div>
                     </div>
 
                     <div class="form-group">
-                        <label for="categoryId">Danh mục</label>
-                        <select id="categoryId" name="categoryId">
+                        <label for="categoryId">Danh mục <span style="color:#ef4444;">*</span></label>
+                        <select id="categoryId" name="categoryId" required>
                             <option value="">-- Chọn danh mục --</option>
                             <c:forEach items="${categories}" var="cat">
-                                <option value="${cat.categoryid}"><c:out value="${cat.categoryname}" /></option>
+                                <option value="${cat.categoryid}" ${(not empty categoryId && categoryId == cat.categoryid) || param.categoryId == cat.categoryid ? 'selected' : ''}>
+                                    <c:out value="${cat.categoryname}" />
+                                </option>
                             </c:forEach>
                         </select>
+                        <div class="invalid-feedback">Vui lòng chọn danh mục cho video.</div>
                     </div>
 
                     <div class="form-group">
                         <label for="description">Mô tả</label>
-                        <textarea id="description" name="description" rows="3" placeholder="Nhập mô tả video..."></textarea>
+                        <textarea id="description" name="description" rows="3" placeholder="Nhập mô tả video..."><c:out value='${not empty description ? description : param.description}' /></textarea>
                     </div>
 
                     <div class="form-group">
                         <label for="poster">Ảnh bìa (Poster)</label>
                         <input type="file" id="poster" name="poster" accept="image/*">
+                        <div class="invalid-feedback">Ảnh bìa không được vượt quá 5MB.</div>
                         <div class="help-text" style="color: #64748b; font-size: 12px; margin-top: 4px;">Tùy chọn. Với nguồn YouTube, nếu để trống thì hệ thống sẽ tự động lấy ảnh Thumbnail chính thức từ YouTube.</div>
                     </div>
 
@@ -155,11 +153,13 @@
                     <div class="form-group" id="localGroup">
                         <label for="videoFile">File Video (Tối đa 200MB)</label>
                         <input type="file" id="videoFile" name="videoFile" accept="video/mp4,video/webm,video/ogg">
+                        <div class="invalid-feedback">File video không được vượt quá 200MB.</div>
                     </div>
 
                     <div class="form-group" id="ytGroup" style="display: none;">
                         <label for="youtubeUrl">Đường dẫn YouTube</label>
                         <input type="text" id="youtubeUrl" name="youtubeUrl" placeholder="https://www.youtube.com/watch?v=...">
+                        <div class="invalid-feedback">Vui lòng nhập đường dẫn YouTube hợp lệ.</div>
                     </div>
 
                     <div class="form-group">
@@ -178,6 +178,7 @@
         </main>
     </div>
 
+    <script src="${pageContext.request.contextPath}/assets/js/form-validation.js"></script>
     <script>
         function toggleSource() {
             var isLocal = document.querySelector('input[name="sourceType"]:checked').value === 'LOCAL';

@@ -62,26 +62,14 @@
         .btn-primary:hover { background: #1d4ed8; }
         .btn-secondary { background: #64748b; color: #fff; }
         .btn-secondary:hover { background: #475569; }
+        /* Bootstrap-compatible validation feedback */
+        .invalid-feedback { display: none; color: #ef4444; font-size: 12px; margin-top: 4px; }
+        .was-validated input:invalid ~ .invalid-feedback { display: block; }
+        .was-validated input:invalid { border-color: #ef4444; }
     </style>
 </head>
 <body>
-    <header class="topbar">
-        <div class="topbar-container">
-            <div class="nav-brand-group">
-                <a href="${pageContext.request.contextPath}/home" class="brand-logo">MyVideo Platform</a>
-                <span class="nav-subtitle">Quản Trị Danh Mục - Thêm Mới</span>
-            </div>
-            <div class="nav-user-group">
-                <div class="user-greeting">
-                    <span class="user-name"><c:out value="${sessionScope.account != null ? sessionScope.account.username : 'Admin'}" /></span>
-                    <span class="user-role-pill">Admin</span>
-                </div>
-                <a href="<c:url value='/logout' />" class="btn-logout">Đăng xuất</a>
-            </div>
-        </div>
-    </header>
-
-    <div class="main-container">
+<div class="main-container">
         <aside class="sidebar">
             <div class="user-panel">
                 <c:url value="/image?fname=${sessionScope.account != null && not empty sessionScope.account.avatar ? sessionScope.account.avatar : 'admin.png'}" var="userAvatar" />
@@ -103,10 +91,18 @@
         <main class="content">
             <div class="card">
                 <h2>Thêm Danh Mục Sản Phẩm Mới</h2>
-                <form action="<c:url value='/admin/category/insert'/>" method="post" enctype="multipart/form-data">
+                <c:if test="${alert != null}">
+                    <div style="background:#fef2f2;color:#991b1b;padding:11px 14px;border-radius:6px;margin-bottom:18px;font-size:13px;border:1px solid #fecaca;">${alert}</div>
+                </c:if>
+                <form action="<c:url value='/admin/category/insert'/>" method="post" enctype="multipart/form-data"
+                      class="needs-validation" novalidate>
                     <div class="form-group">
                         <label for="categoryname">Tên Danh Mục <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="categoryname" name="categoryname" required placeholder="Nhập tên danh mục..." />
+                        <input type="text" id="categoryname" name="categoryname"
+                               required minlength="2" maxlength="255"
+                               placeholder="Nhập tên danh mục..."
+                               value="<c:out value='${not empty categoryname ? categoryname : param.categoryname}' />" />
+                        <div class="invalid-feedback">Tên danh mục phải từ 2 đến 255 ký tự.</div>
                     </div>
 
                     <div class="form-group">
@@ -115,8 +111,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="images1">Hoặc tải file ảnh lên:</label>
+                        <label for="images1">Hoặc tải file ảnh lên (Tối đa 5MB):</label>
                         <input type="file" id="images1" name="images1" accept="image/*" />
+                        <div class="invalid-feedback">Ảnh không được vượt quá 5MB.</div>
                     </div>
 
                     <div class="form-group">
@@ -135,5 +132,6 @@
             </div>
         </main>
     </div>
+<script src="${pageContext.request.contextPath}/assets/js/form-validation.js"></script>
 </body>
 </html>

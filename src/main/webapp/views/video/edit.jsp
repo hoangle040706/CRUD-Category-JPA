@@ -54,45 +54,16 @@
         .alert-info { background-color: #eff6ff; color: #1e40af; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bfdbfe; font-size: 14px; }
         .current-preview { display: flex; gap: 15px; align-items: center; margin-top: 8px; }
         .current-thumb { width: 120px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
+        /* Validation feedback */
+        .invalid-feedback { display: none; color: #ef4444; font-size: 12px; margin-top: 4px; }
+        .was-validated input:invalid ~ .invalid-feedback,
+        .was-validated select:invalid ~ .invalid-feedback { display: block; }
+        .was-validated input:invalid,
+        .was-validated select:invalid { border-color: #ef4444; }
     </style>
 </head>
 <body>
-    <header class="topbar">
-        <div class="topbar-container">
-            <div class="nav-brand-group">
-                <a href="${pageContext.request.contextPath}/home" class="brand-logo">MyVideo Platform</a>
-                <nav class="nav-menu">
-                    <a href="${pageContext.request.contextPath}/home" class="nav-link">Trang chủ</a>
-                    <a href="${pageContext.request.contextPath}/video" class="nav-link">Tất cả Video</a>
-                    <a href="${pageContext.request.contextPath}/admin/category/list" class="nav-link">Danh mục</a>
-                    <a href="${pageContext.request.contextPath}/video?filter=my" class="nav-link">Video của tôi</a>
-                    <a href="${pageContext.request.contextPath}/video/upload" class="nav-link">Đăng Video</a>
-                    <c:if test="${sessionScope.account.roleid == 1}">
-                        <a href="${pageContext.request.contextPath}/admin/home" class="nav-link nav-link-badge">Quản trị Admin</a>
-                        <a href="${pageContext.request.contextPath}/admin/videos" class="nav-link nav-link-badge">Duyệt Video</a>
-                    </c:if>
-                    <c:if test="${sessionScope.account.roleid == 2}">
-                        <a href="${pageContext.request.contextPath}/manager/home" class="nav-link nav-link-badge">Bảng điều khiển Manager</a>
-                    </c:if>
-                </nav>
-            </div>
-            <div class="nav-user-group">
-                <div class="user-greeting">
-                    <span class="user-name"><c:out value="${sessionScope.account.fullName}" /></span>
-                    <span class="user-role-pill">
-                        <c:choose>
-                            <c:when test="${sessionScope.account.roleid == 1}">Admin</c:when>
-                            <c:when test="${sessionScope.account.roleid == 2}">Manager</c:when>
-                            <c:otherwise>Thành viên</c:otherwise>
-                        </c:choose>
-                    </span>
-                </div>
-                <a href="${pageContext.request.contextPath}/logout" class="btn-logout">Đăng xuất</a>
-            </div>
-        </div>
-    </header>
-
-    <div class="container">
+<div class="container">
         <div class="card">
             <h1>Chỉnh Sửa Video</h1>
 
@@ -104,18 +75,20 @@
                 <div class="alert-danger"><c:out value="${error}" /></div>
             </c:if>
 
-            <form method="post" action="${pageContext.request.contextPath}/video/update" enctype="multipart/form-data">
+            <form method="post" action="${pageContext.request.contextPath}/video/update" enctype="multipart/form-data"
+                  class="needs-validation" novalidate>
                 <input type="hidden" name="csrfToken" value="${sessionScope.CSRF_TOKEN}">
                 <input type="hidden" name="videoId" value="${video.videoId}">
 
                 <div class="form-group">
                     <label for="title">Tiêu đề Video <span style="color:#ef4444;">*</span></label>
                     <input type="text" id="title" name="title" required value="<c:out value="${video.title}" />" maxlength="500">
+                    <div class="invalid-feedback">Tiêu đề video không được để trống.</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="categoryId">Danh mục</label>
-                    <select id="categoryId" name="categoryId">
+                    <label for="categoryId">Danh mục <span style="color:#ef4444;">*</span></label>
+                    <select id="categoryId" name="categoryId" required>
                         <option value="">-- Chọn Danh mục --</option>
                         <c:forEach items="${categories}" var="cat">
                             <option value="${cat.categoryid}" ${video.category != null && video.category.categoryid == cat.categoryid ? 'selected' : ''}>
@@ -123,6 +96,7 @@
                             </option>
                         </c:forEach>
                     </select>
+                    <div class="invalid-feedback">Vui lòng chọn danh mục cho video.</div>
                 </div>
 
                 <div class="form-group">
@@ -146,6 +120,7 @@
                         </div>
                     </c:if>
                     <input type="file" id="poster" name="poster" accept="image/*" style="margin-top: 8px;">
+                    <div class="invalid-feedback">Ảnh bìa không được vượt quá 5MB.</div>
                     <div class="help-text">Chọn ảnh mới nếu muốn thay đổi (Tối đa 5MB). Để trống nếu giữ nguyên.</div>
                 </div>
 
@@ -169,12 +144,14 @@
                         <div class="help-text" style="margin-bottom: 6px;">File hiện tại: <b><c:out value="${video.videoPath}" /></b></div>
                     </c:if>
                     <input type="file" id="videoFile" name="videoFile" accept="video/mp4,video/webm,video/ogg">
+                    <div class="invalid-feedback">File video không được vượt quá 200MB.</div>
                     <div class="help-text">Chọn file mới nếu muốn cập nhật video. Để trống nếu giữ nguyên video cũ.</div>
                 </div>
 
                 <div class="form-group" id="youtubeGroup" style="${video.sourceType == 'YOUTUBE' ? 'display:block;' : 'display:none;'}">
                     <label for="youtubeUrl">Đường dẫn Video YouTube</label>
                     <input type="text" id="youtubeUrl" name="youtubeUrl" value="<c:out value="${video.sourceType == 'YOUTUBE' ? video.videoPath : ''}" />" placeholder="https://www.youtube.com/watch?v=...">
+                    <div class="invalid-feedback">Vui lòng nhập đường dẫn YouTube hợp lệ.</div>
                 </div>
 
                 <div class="btn-group">
@@ -185,6 +162,7 @@
         </div>
     </div>
 
+    <script src="${pageContext.request.contextPath}/assets/js/form-validation.js"></script>
     <script>
         function toggleSource() {
             var isLocal = document.querySelector('input[name="sourceType"]:checked').value === 'LOCAL';

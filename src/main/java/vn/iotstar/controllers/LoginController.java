@@ -1,6 +1,7 @@
 package vn.iotstar.controllers;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.Cookie;
@@ -48,6 +49,15 @@ public class LoginController extends HttpServlet {
 
         if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
             req.setAttribute("alert", "Tài khoản hoặc mật khẩu không được rỗng!");
+            req.setAttribute("username", username != null ? username.trim() : "");
+            req.getRequestDispatcher(Constant.Path.LOGIN).forward(req, resp);
+            return;
+        }
+
+        // Server-side: validate password byte length (bcrypt limit)
+        if (password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
+            req.setAttribute("alert", "Mật khẩu không được vượt quá 72 bytes!");
+            req.setAttribute("username", username.trim());
             req.getRequestDispatcher(Constant.Path.LOGIN).forward(req, resp);
             return;
         }
@@ -55,6 +65,7 @@ public class LoginController extends HttpServlet {
         User user = userService.login(username.trim(), password.trim());
         if (user == null) {
             req.setAttribute("alert", "Tài khoản hoặc mật khẩu không chính xác!");
+            req.setAttribute("username", username.trim());
             req.getRequestDispatcher(Constant.Path.LOGIN).forward(req, resp);
             return;
         }

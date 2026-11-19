@@ -55,9 +55,10 @@ public class VerifyOtpController extends HttpServlet {
         }
 
         String otp = req.getParameter("otp");
-        if (otp == null || otp.trim().isEmpty()) {
+        if (otp == null || otp.trim().isEmpty() || !otp.trim().matches("\\d{6}")) {
             req.setAttribute("email", email);
-            req.setAttribute("alert", "Vui lòng nhập mã OTP!");
+            req.setAttribute("otp", otp != null ? otp.trim() : "");
+            req.setAttribute("alert", "Vui lòng nhập đúng mã OTP gồm 6 chữ số!");
             req.getRequestDispatcher(Constant.Path.VERIFY_OTP).forward(req, resp);
             return;
         }
@@ -69,6 +70,7 @@ public class VerifyOtpController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/login");
         } else {
             req.setAttribute("email", email);
+            req.setAttribute("otp", otp.trim());
             if (result == IUserService.OTP_ATTEMPTS_EXCEEDED) {
                 req.setAttribute("alert", "Bạn đã nhập sai 5 lần. Mã OTP đã bị vô hiệu hóa vì lý do bảo mật. Vui lòng yêu cầu mã mới.");
             } else if (result == IUserService.OTP_INVALID) {

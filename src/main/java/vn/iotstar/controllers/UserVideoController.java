@@ -23,6 +23,7 @@ import vn.iotstar.service.IVideoService;
 import vn.iotstar.service.VideoServiceImpl;
 import vn.iotstar.util.Constant;
 import vn.iotstar.util.CsrfUtil;
+import vn.iotstar.util.ValidationUtil;
 
 @WebServlet(urlPatterns = {
         "/video/upload", "/video/insert", "/video/edit", "/video/update", "/video/delete"
@@ -111,10 +112,41 @@ public class UserVideoController extends HttpServlet {
         String sourceTypeStr = req.getParameter("sourceType");
         String youtubeUrl = req.getParameter("youtubeUrl");
 
-        if (title == null || title.trim().isEmpty()) {
-            req.setAttribute("error", "Tiêu đề video không được để trống!");
+        // Helper to forward back with preserved inputs
+        java.util.function.Consumer<String> sendError = (msg) -> {
+            req.setAttribute("error", msg);
+            req.setAttribute("title", title);
+            req.setAttribute("description", description);
+            req.setAttribute("categoryId", categoryIdRaw);
             req.setAttribute("categories", categoryService.findAll());
-            req.getRequestDispatcher("/views/video/upload.jsp").forward(req, resp);
+            try {
+                req.getRequestDispatcher("/views/video/upload.jsp").forward(req, resp);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
+
+        if (title == null || title.trim().isEmpty()) {
+            sendError.accept("Tiêu đề video không được để trống!");
+            return;
+        }
+
+        if (categoryIdRaw == null || categoryIdRaw.trim().isEmpty()) {
+            sendError.accept("Vui lòng chọn danh mục cho video!");
+            return;
+        }
+
+        int catId;
+        Category category = null;
+        try {
+            catId = Integer.parseInt(categoryIdRaw.trim());
+            category = categoryService.findById(catId);
+        } catch (Exception e) {
+            sendError.accept("Danh mục không hợp lệ!");
+            return;
+        }
+        if (category == null) {
+            sendError.accept("Danh mục đã chọn không tồn tại!");
             return;
         }
 
@@ -132,9 +164,7 @@ public class UserVideoController extends HttpServlet {
             Part posterPart = req.getPart("poster");
             if (posterPart != null && posterPart.getSize() > 0) {
                 if (posterPart.getSize() > Constant.MAX_POSTER_SIZE) {
-                    req.setAttribute("error", "Ảnh bìa poster không được vượt quá 5MB!");
-                    req.setAttribute("categories", categoryService.findAll());
-                    req.getRequestDispatcher("/views/video/upload.jsp").forward(req, resp);
+                    sendError.accept("Ảnh bìa poster không được vượt quá 5MB!");
                     return;
                 }
                 String origName = getFileName(posterPart);
@@ -148,15 +178,11 @@ public class UserVideoController extends HttpServlet {
             if (sourceType == VideoSourceType.LOCAL) {
                 Part videoPart = req.getPart("videoFile");
                 if (videoPart == null || videoPart.getSize() == 0) {
-                    req.setAttribute("error", "Vui lòng chọn file video cần upload!");
-                    req.setAttribute("categories", categoryService.findAll());
-                    req.getRequestDispatcher("/views/video/upload.jsp").forward(req, resp);
+                    sendError.accept("Vui lòng chọn file video cần upload!");
                     return;
                 }
                 if (videoPart.getSize() > Constant.MAX_VIDEO_SIZE) {
-                    req.setAttribute("error", "File video không được vượt quá 200MB!");
-                    req.setAttribute("categories", categoryService.findAll());
-                    req.getRequestDispatcher("/views/video/upload.jsp").forward(req, resp);
+                    sendError.accept("File video không được vượt quá 200MB!");
                     return;
                 }
                 String origVideoName = getFileName(videoPart);
@@ -165,11 +191,13 @@ public class UserVideoController extends HttpServlet {
                 writtenVideoFile = new File(videoDir, savedVideoPath);
                 videoPart.write(writtenVideoFile.getAbsolutePath());
             } else {
+                if (youtubeUrl == null || youtubeUrl.trim().isEmpty() || !ValidationUtil.isValidYouTubeUrl(youtubeUrl)) {
+                    sendError.accept("Đường dẫn YouTube không hợp lệ!");
+                    return;
+                }
                 savedVideoPath = videoService.normalizeYouTubeEmbedUrl(youtubeUrl);
                 if (savedVideoPath == null || savedVideoPath.trim().isEmpty()) {
-                    req.setAttribute("error", "Đường dẫn YouTube không hợp lệ!");
-                    req.setAttribute("categories", categoryService.findAll());
-                    req.getRequestDispatcher("/views/video/upload.jsp").forward(req, resp);
+                    sendError.accept("Đường dẫn YouTube không hợp lệ!");
                     return;
                 }
                 // Tự động lấy thumbnail YouTube nếu người dùng không upload poster riêng
@@ -188,15 +216,7 @@ public class UserVideoController extends HttpServlet {
             video.setActive(0); // Mặc định chờ Admin duyệt
             video.setViews(0);
             video.setUser(currentUser);
-
-            if (categoryIdRaw != null && !categoryIdRaw.trim().isEmpty()) {
-                try {
-                    int catId = Integer.parseInt(categoryIdRaw.trim());
-                    Category cat = categoryService.findById(catId);
-                    video.setCategory(cat);
-                } catch (Exception ignored) {
-                }
-            }
+            video.setCategory(category);
 
             // Ghi dữ liệu vào DB
             videoService.insert(video);
@@ -210,9 +230,7 @@ public class UserVideoController extends HttpServlet {
             if (writtenVideoFile != null && writtenVideoFile.exists()) {
                 writtenVideoFile.delete();
             }
-            req.setAttribute("error", "Lỗi trong quá trình upload video: " + e.getMessage());
-            req.setAttribute("categories", categoryService.findAll());
-            req.getRequestDispatcher("/views/video/upload.jsp").forward(req, resp);
+            sendError.accept("Lỗi trong quá trình upload video: " + e.getMessage());
         }
     }
 
@@ -238,6 +256,34 @@ public class UserVideoController extends HttpServlet {
 
         if (title == null || title.trim().isEmpty()) {
             req.setAttribute("error", "Tiêu đề video không được để trống!");
+            req.setAttribute("video", existing);
+            req.setAttribute("categories", categoryService.findAll());
+            req.getRequestDispatcher("/views/video/edit.jsp").forward(req, resp);
+            return;
+        }
+
+        if (categoryIdRaw == null || categoryIdRaw.trim().isEmpty()) {
+            req.setAttribute("error", "Vui lòng chọn danh mục cho video!");
+            req.setAttribute("video", existing);
+            req.setAttribute("categories", categoryService.findAll());
+            req.getRequestDispatcher("/views/video/edit.jsp").forward(req, resp);
+            return;
+        }
+
+        int updateCatId;
+        Category updatedCategory = null;
+        try {
+            updateCatId = Integer.parseInt(categoryIdRaw.trim());
+            updatedCategory = categoryService.findById(updateCatId);
+        } catch (Exception e) {
+            req.setAttribute("error", "Danh mục không hợp lệ!");
+            req.setAttribute("video", existing);
+            req.setAttribute("categories", categoryService.findAll());
+            req.getRequestDispatcher("/views/video/edit.jsp").forward(req, resp);
+            return;
+        }
+        if (updatedCategory == null) {
+            req.setAttribute("error", "Danh mục đã chọn không tồn tại!");
             req.setAttribute("video", existing);
             req.setAttribute("categories", categoryService.findAll());
             req.getRequestDispatcher("/views/video/edit.jsp").forward(req, resp);
@@ -290,6 +336,13 @@ public class UserVideoController extends HttpServlet {
                 }
             } else {
                 if (youtubeUrl != null && !youtubeUrl.trim().isEmpty()) {
+                    if (!ValidationUtil.isValidYouTubeUrl(youtubeUrl)) {
+                        req.setAttribute("error", "Đường dẫn YouTube không hợp lệ!");
+                        req.setAttribute("video", existing);
+                        req.setAttribute("categories", categoryService.findAll());
+                        req.getRequestDispatcher("/views/video/edit.jsp").forward(req, resp);
+                        return;
+                    }
                     newVideoPath = videoService.normalizeYouTubeEmbedUrl(youtubeUrl);
                 }
                 if (newPosterName == null || newPosterName.trim().isEmpty()) {
@@ -307,15 +360,7 @@ public class UserVideoController extends HttpServlet {
             toUpdate.setPoster(newPosterName != null ? newPosterName : oldPoster);
             toUpdate.setVideoPath(newVideoPath != null ? newVideoPath : oldVideoPath);
             toUpdate.setSourceType(newVideoPath != null ? newSourceType : oldSourceType);
-
-            if (categoryIdRaw != null && !categoryIdRaw.trim().isEmpty()) {
-                try {
-                    int catId = Integer.parseInt(categoryIdRaw.trim());
-                    Category cat = categoryService.findById(catId);
-                    toUpdate.setCategory(cat);
-                } catch (Exception ignored) {
-                }
-            }
+            toUpdate.setCategory(updatedCategory);
 
             boolean updated = videoService.updateByUser(toUpdate, currentUser.getId());
             if (updated) {

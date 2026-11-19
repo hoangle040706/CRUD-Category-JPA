@@ -77,29 +77,7 @@
     </style>
 </head>
 <body>
-    <header class="topbar">
-        <div class="topbar-container">
-            <div class="nav-brand-group">
-                <a href="${pageContext.request.contextPath}/home" class="brand-logo">MyVideo Platform</a>
-                <span class="nav-subtitle">Quản Lý Danh Mục Sản Phẩm</span>
-            </div>
-            <div class="nav-user-group">
-                <div class="user-greeting">
-                    <span class="user-name"><c:out value="${sessionScope.account != null ? sessionScope.account.username : 'User'}" /></span>
-                    <span class="user-role-pill">
-                        <c:choose>
-                            <c:when test="${sessionScope.account != null && sessionScope.account.roleid == 1}">Admin</c:when>
-                            <c:when test="${sessionScope.account != null && sessionScope.account.roleid == 2}">Manager</c:when>
-                            <c:otherwise>Thành viên</c:otherwise>
-                        </c:choose>
-                    </span>
-                </div>
-                <a href="<c:url value='/logout' />" class="btn-logout">Đăng xuất</a>
-            </div>
-        </div>
-    </header>
-
-    <div class="main-container">
+<div class="main-container">
         <aside class="sidebar">
             <div class="user-panel">
                 <c:url value="/image?fname=${sessionScope.account != null && not empty sessionScope.account.avatar ? sessionScope.account.avatar : 'admin.png'}" var="userAvatar" />

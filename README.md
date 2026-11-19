@@ -2,122 +2,158 @@
 > **Môn học:** Lập trình Web với Java & Jakarta EE  
 > **Giảng viên hướng dẫn:** ThS. Nguyễn Hữu Trung - HCMUTE  
 > **Sinh viên thực hiện:** Lê Minh Hoàng  
-> **Công nghệ:** Jakarta EE 10 (Servlet 6.1, JSP 4.0), Hibernate ORM 7.x (JPA 3.0), MySQL 8.x, Apache Tomcat 10/11
+> **Công nghệ:** Jakarta EE 10 (Servlet 6.1, JSP 4.0), Hibernate ORM 7.x (JPA 3.0), SiteMesh 3, Bootstrap 5.3, MySQL 8.x, Apache Tomcat 10/11
 
 ---
 
 ## 1. Tổng Quan Dự Án
 
-**MyVideo Platform** là ứng dụng web quản lý nội dung đa phương tiện và danh mục sản phẩm, xây dựng theo mô hình **MVC (Model - View - Controller)** kết hợp **DAO - Service Pattern** và công nghệ ánh xạ quan hệ đối tượng **JPA 3.0 (Jakarta Persistence)**.
+**MyVideo Platform** là ứng dụng web quản lý nội dung đa phương tiện và danh mục sản phẩm hoàn chỉnh, xây dựng theo mô hình kiến trúc đa tầng **MVC (Model - View - Controller)** kết hợp **DAO - Service Pattern**, công nghệ ánh xạ quan hệ đối tượng **JPA 3.0 (Jakarta Persistence)**, hệ thống giao diện trang trí **SiteMesh Decorator 3** trên nền tảng **Bootstrap 5.3**, cùng cơ chế **Validation 2 lớp (Client & Server)** toàn diện.
 
-Hệ thống tích hợp đầy đủ 3 giai đoạn bài tập trọng tâm:
-1. **Bài tập 02:** Kiến trúc ORM JPA 3.0, CRUD Category & Video cơ bản.
-2. **Bài tập 16/11:** Xác thực bảo mật người dùng, mã hóa mật khẩu BCrypt, kích hoạt tài khoản & quên mật khẩu bằng OTP Email bất đồng bộ, Remember Me Token Rotation.
-3. **Mục 4 Bài tập (Hạn 19/11):** Nâng cấp toàn diện quan hệ bảng `videos` (1-N với `users`, N-1 với `categories`), CRUD Video hoàn chỉnh, phân trang 6 video/trang, Top 10 video trang chủ, Video Player (YouTube iframe & Local Stream MP4), upload file chuẩn Multipart và hệ thống giao diện xanh dương đồng bộ cho 3 nhóm quyền.
+Hệ thống tích hợp đầy đủ 4 giai đoạn bài tập trọng tâm theo đúng tiến độ:
+1. **Bài tập 02:** Kiến trúc ORM JPA 3.0, kết nối Hibernate 7, cấu trúc DDL và CRUD Category & Video cơ bản.
+2. **Bài tập 16/11:** Xác thực bảo mật người dùng, mã hóa mật khẩu BCrypt, kích hoạt tài khoản & quên mật khẩu bằng OTP Email bất đồng bộ, Remember Me Token Rotation chống tấn công phát lại.
+3. **Mục 4 Bài tập:** Nâng cấp quan hệ bảng `videos` (1-N với `users`, N-1 với `categories`), CRUD Video hoàn chỉnh, phân trang 6 video/trang, Top 10 video trang chủ, Video Player (YouTube iframe & Local Stream MP4 HTTP Range), tự động trích xuất Thumbnail YouTube làm poster.
+4. **Bài tập 19/11 (Hoàn thành trước 16:00 ngày 19/11/2026):**
+   - Cấu hình **SiteMesh Decorator 3** với **Template Bootstrap 5.3** chuẩn doanh nghiệp, thống nhất Navbar responsive đa quyền và Footer HCMUTE trên toàn hệ thống.
+   - Triển khai **Validation 2 lớp toàn diện** cho tất cả các chức năng có FORM: Đăng nhập (`login`), Đăng ký (`register`), Quên mật khẩu (`forgot-password`), Đặt lại mật khẩu (`reset-password`), Xác thực OTP (`verify-otp`), Thêm/Sửa danh mục (`category`), Đăng tải/Sửa video (`video`).
 
 ---
 
 ## 2. Các Phân Hệ Chức Năng Chính
 
-### 2.1. Phân hệ Xác thực & Bảo mật (Authentication & Security)
-- **Đăng ký tài khoản (`/register`):** Tài khoản mới có `status = 0`, hệ thống sinh mã OTP 6 chữ số an toàn qua `SecureRandom` và gửi email kích hoạt bất đồng bộ.
-- **Kích hoạt tài khoản bằng OTP Email (`/verify-otp`):** 
-  - Giao diện đếm ngược 60s cho nút gửi lại mã OTP (`/resend-otp`).
-  - Giới hạn nhập sai tối đa 5 lần (lần thứ 5 tự động hủy mã).
-  - Cập nhật nguyên tử (`consumeRegisterOtp`) ngăn chặn race condition khi xác thực đồng thời.
+### 2.1. Phân hệ Giao Diện Chuẩn Hóa: SiteMesh Decorator 3 & Bootstrap 5
+- **Công nghệ Decorator:** Sử dụng thư viện `org.sitemesh:sitemesh:3.2.2` tương thích chuẩn với không gian tên `jakarta.servlet.*` trên Apache Tomcat 10.1 và 11.0.
+- **Bộ lọc trang trí (`MySiteMeshFilter.java`):**
+  - Kế thừa `ConfigurableSiteMeshFilter`, ánh xạ toàn bộ các yêu cầu `/*` tới Master Decorator `/views/decorators/web.jsp`.
+  - Thiết lập loại trừ (`addExcludedPath`) cho các endpoint nhị phân và dữ liệu thô: streaming video cục bộ (`/video/stream*`), phục vụ hình ảnh (`/image*`), tài nguyên tĩnh (`/assets/*`), và các decorator views nội bộ (`/views/decorators/*`).
+- **Master Decorator Template (`web.jsp`):**
+  - Tích hợp **Bootstrap 5.3.3 CDN** (CSS và JavaScript Bundle).
+  - Kiến trúc Flexbox dạng cột cố định (`flex-direction: column`, `min-height: 100vh`) với `<main class="site-main-content">` co giãn tự động (`flex: 1 0 auto`), loại bỏ hoàn toàn hiện tượng vỡ layout hoặc xô lệch hàng ngang trên các màn hình xác thực.
+  - **Thanh Navbar Master responsive:** Tông màu xanh dương thương hiệu (`#1e3a8a`, `#2563eb`), tự động nhận diện và làm nổi bật (active) route hiện tại, hiển thị điều hướng chuyên biệt theo 3 vai trò:
+    - *Khách:* Xem Trang chủ, Tất cả Video, Danh mục, Nút Đăng nhập / Đăng ký.
+    - *Người dùng đã đăng nhập:* Bổ sung menu "Video của tôi", "Đăng Video", Họ tên người dùng, Huy hiệu quyền và nút Đăng xuất.
+    - *Quản trị viên (Admin):* Bổ sung nút tắt "Quản trị Admin", "Duyệt Video".
+    - *Quản lý (Manager):* Bổ sung nút tắt "Bảng điều khiển Manager".
+  - **Chân trang (Footer) HCMUTE:** Cố định bám đáy (`mt-auto`), hiển thị thông tin Khoa Công nghệ Thông tin - Trường Đại học Sư phạm Kỹ thuật TP.HCM.
+
+---
+
+### 2.2. Phân hệ Kiểm Tra Dữ Liệu 2 Lớp (Form Validation)
+
+Hệ thống thiết lập cơ chế kiểm tra tính hợp lệ đa tầng, kết hợp trải nghiệm phản hồi nhanh tức thì ở phía Client (HTML5 + Bootstrap 5) cùng sự an toàn dữ liệu tuyệt đối ở phía Server:
+
+```
+[Người dùng nhập FORM]
+         │
+         ▼ (Client-side: form-validation.js)
+┌────────────────────────────────────────────────────────┐
+│ - Bootstrap 5 was-validated                           │
+│ - Pattern Regex: Email, Số điện thoại VN, Username    │
+│ - Độ dài: Mật khẩu 6–72 ký tự, Tiêu đề, Tên danh mục  │
+│ - File size check: Video <= 200MB, Poster <= 5MB       │
+│ - So khớp mật khẩu xác nhận thời gian thực            │
+└────────────────────────────────────────────────────────┘
+         │ Hợp lệ (SUBMIT)
+         ▼
+┌────────────────────────────────────────────────────────┐
+│ Server Controller (ValidationUtil.java)                │
+│ - Kiểm tra Regex chuẩn phía Server                    │
+│ - BCrypt UTF-8 Byte Length <= 72 bytes                │
+│ - Kiểm tra trùng lặp Email / Username trong CSDL      │
+│ - Kiểm tra MIME type và dung lượng tệp Multipart      │
+│ - Lưu giữ giá trị form (Re-population) khi có lỗi     │
+└────────────────────────────────────────────────────────┘
+         │
+         ├─── Không hợp lệ ──► Forward lại JSP + Hiển thị invalid-feedback / alert
+         └─── Hợp lệ ───────► Thực thi nghiệp vụ Service & Chuyển hướng
+```
+
+#### Phạm vi áp dụng chi tiết cho các chức năng có FORM:
+
+| Chức năng Form | Client-Side Validation | Server-Side Controller | File Controller & JSP |
+| :--- | :--- | :--- | :--- |
+| **Đăng nhập (`/login`)** | `required`, `minlength="3"`, `minlength="6"`, hiển thị `.invalid-feedback`. | Kiểm tra rỗng, kiểm tra giới hạn 72 bytes, giữ lại username đã nhập. | `LoginController.java`<br>`views/login.jsp` |
+| **Đăng ký (`/register`)** | `pattern="[a-zA-Z0-9_]{3,50}"`, email HTML5, phone 10 số `0[3-9]\d{8}`, password 6-72 ký tự. | Kiểm tra trùng email, trùng username, độ dài UTF-8 an toàn BCrypt, re-populate mọi trường. | `RegisterController.java`<br>`views/register.jsp` |
+| **Quên mật khẩu (`/forgot-password`)** | `type="email"`, `required`, kiểm tra định dạng email. | `ValidationUtil.isValidEmail`, timing-safe response chống leak email. | `ForgotPasswordController.java`<br>`views/auth/forgot-password.jsp` |
+| **Xác thực OTP (`/verify-otp`)** | `pattern="[0-9]{6}"`, `maxlength="6"`, `autofocus`, đếm ngược 60s. | `otp.matches("\\d{6}")`, kiểm tra hết hạn 5 phút, giới hạn 5 lần thử. | `VerifyOtpController.java`<br>`views/auth/verify-otp.jsp` |
+| **Đặt lại MK (`/reset-password`)** | OTP 6 số, Mật khẩu mới 6-72 ký tự, so khớp `#confirmPassword`. | Kiểm tra khớp mật khẩu, băm BCrypt mật khẩu mới, hủy mã OTP. | `ResetPasswordController.java`<br>`views/auth/reset-password.jsp` |
+| **Thêm / Sửa Danh mục** | `categoryname` từ 2–255 ký tự, `required`, file ảnh minh họa $\le$ 5MB. | Kiểm tra null/empty, độ dài chuỗi, kiểm tra dung lượng `Part.getSize()`. | `CategoryController.java`<br>`views/admin/category-add.jsp`<br>`views/admin/category-edit.jsp` |
+| **Đăng tải / Sửa Video** | `title` bắt buộc, `categoryId` bắt buộc, YouTube URL regex hoặc MP4 $\le$ 200MB, Poster $\le$ 5MB. | `ValidationUtil.isValidYouTubeUrl`, kiểm tra ràng buộc `Title NOT NULL`, kiểm tra kích thước file tải lên. | `UserVideoController.java`<br>`AdminVideoController.java`<br>`views/video/upload.jsp`<br>`views/video/edit.jsp` |
+
+---
+
+### 2.3. Phân hệ Xác thực & Bảo mật (Authentication & Security)
+- **Kích hoạt tài khoản bằng OTP Email:** Sinh mã 6 chữ số ngẫu nhiên mật mã (`SecureRandom`), gửi bất đồng bộ qua Gmail SMTP với ExecutorService.
 - **Mã hóa mật khẩu BCrypt & Lazy Re-hash:**
-  - Băm mật khẩu một chiều chuẩn **BCrypt** (cost factor = 10), giới hạn $\le 72$ byte UTF-8.
-  - Tự động nâng cấp mật khẩu cũ (plaintext) sang chuẩn băm BCrypt ngay khi người dùng đăng nhập thành công.
-- **Cơ chế Remember Me an toàn cao:**
-  - Sinh token ngẫu nhiên 32-byte lưu cookie, băm SHA-256 lưu cơ sở dữ liệu.
-  - Xoay token nguyên tử (Token Rotation) tại mỗi phiên làm việc, chống Replay Attack và kiểm tra nghiêm ngặt `status = 1`.
-- **Quên mật khẩu & Đặt lại mật khẩu (`/forgot-password`, `/reset-password`):**
-  - Cơ chế timing-safe response chống rò rỉ sự tồn tại của email.
-  - Rate limiting / Cooldown 60 giây chống spam OTP.
+  - Băm mật khẩu chuẩn **BCrypt** (cost factor = 10), giới hạn an toàn $\le 72$ byte UTF-8.
+  - Tự động phát hiện và nâng cấp mật khẩu cũ (plaintext) sang chuẩn BCrypt ngay khi người dùng đăng nhập.
+- **Remember Me Token Rotation:**
+  - Token ngẫu nhiên 32-byte lưu ở cookie, băm SHA-256 lưu cơ sở dữ liệu.
+  - Xoay token nguyên tử tại mỗi phiên, chống tấn công Replay Attack.
 - **Bảo vệ phiên làm việc:** Đổi `sessionId` (`req.changeSessionId()`) khi đăng nhập thành công chống Session Fixation.
 
 ---
 
-### 2.2. Phân hệ Quản lý Danh mục (Category Management)
-- CRUD danh mục sản phẩm theo JPA chuẩn (`ICategoryDao`, `ICategoryService`).
-- Hỗ trợ tải lên ảnh minh họa cho danh mục.
-- Tìm kiếm danh mục theo tên.
-- Phân quyền Admin quản lý danh mục tại `/admin/category/list`, `/admin/category/add`, `/admin/category/edit`.
-
----
-
-### 2.3. Phân hệ Quản lý Video (Mục 4 - Hạn 19/11)
-- **Thiết kế quan hệ dữ liệu:**
-  - Bảng `videos` liên kết N-1 với `users` (người đăng tải) và N-1 với `categories` (danh mục nội dung).
-- **Hỗ trợ 2 nguồn video linh hoạt:**
-  - **YouTube:** Tự động nhận diện và chuẩn hóa tất cả định dạng URL YouTube (`youtube.com/watch?v=...`, `youtu.be/...`, embed URL) thành chuẩn nhúng phát trực tiếp.
-  - **Local Upload (MP4):** Tải file video trực tiếp lên máy chủ qua chuẩn Multipart Servlet (`@MultipartConfig`, `Part.write(...)`).
-- **Phát video (Streaming Player):**
-  - Xem chi tiết video tại `/video/detail?id=...`, tăng lượt xem (`views`) tự động.
-  - Trình phát video cục bộ hỗ trợ stream phân đoạn HTTP Partial Content / Range Requests (`/video/stream?id=...`).
-  - Gợi ý danh sách video mới nhất liên quan tại cột bên phải.
-- **Phân trang & Bộ lọc:**
+### 2.4. Phân hệ Quản lý & Phát Video
+- **Quan hệ thực thể:** `videos` liên kết N-1 với `users` (người đăng tải) và N-1 với `categories` (danh mục). Ràng buộc `title NOT NULL` nghiêm ngặt.
+- **Hỗ trợ 2 nguồn video:**
+  - **YouTube:** Nhận diện và chuẩn hóa tất cả định dạng URL YouTube, tự động trích xuất Thumbnail chất lượng cao từ YouTube làm poster đại diện.
+  - **Local Upload (MP4):** Tải file video lên máy chủ, hỗ trợ phát trực tiếp dạng HTTP Range / Partial Content 206 (`VideoStreamController`).
+- **Phân trang & Kiểm duyệt:**
   - Phân trang chuẩn 6 video/trang tại `/video`.
-  - Bộ lọc **"Video của tôi"** (`/video?filter=my`) cho người dùng quản lý riêng kho video do chính mình đăng tải.
-  - Hiển thị **10 video mới nhất** tại Trang chủ (`/home`).
-- **Quy trình kiểm duyệt nội dung (Moderation Workflow):**
-  - Video người dùng đăng tải mặc định ở trạng thái chờ duyệt (`active = 0`).
-  - Khi người dùng chỉnh sửa video cá nhân, trạng thái tự động đưa về `active = 0` để Admin kiểm duyệt lại.
-  - Admin có quyền duyệt nhanh / khóa video bằng 1 nút bấm (`/admin/video/toggle-active`).
+  - Bộ lọc video cá nhân tại `/video?filter=my`.
+  - Hiển thị 10 video mới nhất trên Trang chủ (`/home`).
+  - Video người dùng đăng tải mặc định ở trạng thái chờ duyệt (`active = 0`); Admin có quyền duyệt nhanh / khóa video bằng 1 nút bấm (`/admin/video/toggle-active`).
 
 ---
 
-### 2.4. Phân Quyền & Luồng Điều Hướng 3 Vai Trò (RBAC)
+### 2.5. Phân Quyền 3 Vai Trò (Role-Based Access Control)
 
-| Vai trò | Role ID | Dashboard mặc định | Quyền hạn chính |
+| Vai trò | Role ID | Route mặc định | Quyền hạn chính |
 | :--- | :---: | :--- | :--- |
-| **ADMIN** | `1` | `/admin/home` | Quản trị toàn hệ thống; Duyệt, khóa, sửa, xóa toàn bộ video (`/admin/videos`); CRUD danh mục sản phẩm (`/admin/category/list`). |
-| **MANAGER** | `2` | `/manager/home` | Dashboard tổng quan theo dõi hệ sinh thái, truy cập kho video và danh mục. |
-| **USER** | `3` | `/home` | Xem kho video công khai, tải lên video mới (`/video/upload`), quản lý và chỉnh sửa video cá nhân (`/video?filter=my`). |
-
-- Bộ lọc bảo vệ `AuthFilter` ngăn chặn truy cập trái phép vào các route quản trị (`/admin/*`, `/manager/*`).
-
----
-
-### 2.5. Tối Ưu Giao Diện Người Dùng (UI/UX)
-- **Tông màu chủ đạo:** Xanh dương hiện đại, chuyên nghiệp, dịu mắt (Primary: `#2563eb`, `#1e3a8a`; Nền: `#f8fafc`; Thẻ: `#ffffff` đổ bóng tinh tế).
-- **Thiết kế phẳng & Tối giản:** Loại bỏ toàn bộ icon/emoji rườm rà, tập trung vào khả năng đọc lướt và thẩm mỹ doanh nghiệp.
-- **Thanh điều hướng (Topbar) ngay ngắn:** Áp dụng `white-space: nowrap` và flexbox căn chuẩn, đảm bảo không bao giờ bị rớt dòng trên mọi kích thước màn hình.
+| **ADMIN** | `1` | `/admin/home` | Toàn quyền hệ thống: Duyệt/Khóa/Sửa/Xóa video (`/admin/videos`); CRUD danh mục sản phẩm (`/admin/category/list`). |
+| **MANAGER** | `2` | `/manager/home` | Dashboard tổng quan theo dõi dữ liệu sản phẩm, duyệt danh mục và xem thống kê. |
+| **USER** | `3` | `/home` | Xem kho video, tải lên video mới (`/video/upload`), quản lý và chỉnh sửa video cá nhân (`/video?filter=my`). |
 
 ---
 
 ## 3. Kiến Trúc & Công Nghệ Sử Dụng
 
 ```
-[Client Browser]
+[Client Browser] (Bootstrap 5.3 + form-validation.js)
        │ HTTP / HTTPS
        ▼
-[Filter Chain] ── RememberMeFilter ── AuthFilter
+[SiteMesh 3 Filter] ── MySiteMeshFilter (web.jsp Decorator: Navbar + Content + Footer)
        │
        ▼
-[Controllers] ── HomeController, VideoController, AdminVideoController, AuthControllers...
+[Filter Chain] ─────── RememberMeFilter ── AuthFilter
        │
        ▼
-[Services] ──── UserService, VideoService, CategoryService
+[Controllers] ──────── HomeController, VideoController, AdminVideoController, AuthControllers...
+       │                (Server Validation: ValidationUtil)
+       ▼
+[Services] ─────────── UserService, VideoService, CategoryService
        │
        ▼
-[DAOs] ──────── UserDao, VideoDao, CategoryDao
+[DAOs] ─────────────── UserDao, VideoDao, CategoryDao
        │
        ▼
-[Hibernate 7 JPA] ── EntityManagerFactory (JpaConfig)
+[Hibernate 7 JPA] ──── EntityManagerFactory (JpaConfig)
        │
        ▼
-[MySQL Database] ── servletjpa (users, categories, videos, schema_version)
+[MySQL Database] ───── servletjpa (users, categories, videos, schema_version)
 ```
 
 - **Java Version:** OpenJDK 17 / 21
 - **Servlet Container:** Apache Tomcat 10.1.61 / 11.0.27 (Jakarta EE 10)
-- **JPA & ORM Framework:** Hibernate ORM 7.4.6.Final (`jakarta.persistence.*`)
+- **Decorator Engine:** SiteMesh 3.2.2 (`org.sitemesh:sitemesh:3.2.2`)
+- **Frontend UI Framework:** Bootstrap 5.3.3 (CSS + JS Bundle CDN)
+- **ORM & JPA Framework:** Hibernate ORM 7.4.6.Final (`jakarta.persistence.*`)
 - **Database:** MySQL 8.x (`mysql-connector-j:8.4.0`)
-- **Mã hóa:** `jbcrypt:0.4`, SHA-256 (`HashUtil`), `SecureRandom`
-- **Email:** Jakarta Mail 2.0.3 kết hợp `ThreadPoolExecutor` (hàng đợi có chặn)
-- **Kiểm thử tự động:** JUnit 5 (`junit-jupiter:5.10.2`), Maven Surefire Plugin 3.2.5
-- **Build Tool:** Apache Maven 3.x
+- **Mã hóa & Hash:** `jbcrypt:0.4`, SHA-256 (`HashUtil`), `SecureRandom`
+- **Email:** Jakarta Mail 2.0.3 kết hợp `ThreadPoolExecutor`
+- **Kiểm thử tự động:** JUnit 5 (`junit-jupiter:5.10.2`), Surefire Plugin 3.2.5
 
 ---
 
@@ -125,10 +161,10 @@ Hệ thống tích hợp đầy đủ 3 giai đoạn bài tập trọng tâm:
 
 ```
 my-project/
-├── pom.xml                                     # Cấu hình Maven, dependencies và test plugin
+├── pom.xml                                     # Cấu hình Maven, SiteMesh 3, Hibernate 7, JUnit 5
 ├── database.sql                                # DDL toàn diện: schema_version, users, categories, videos
-├── database-video-seed.sql                     # Dữ liệu seed 12 video YouTube thực tế theo đúng tiêu đề
-├── database-test-bootstrap.sql                 # DDL deterministic phục vụ test suite tự động
+├── database-video-seed.sql                     # Dữ liệu mẫu 12 video YouTube kèm thumbnail thực tế
+├── database-test-bootstrap.sql                 # DDL phục vụ bộ kiểm thử tự động
 ├── src/main/java/vn/iotstar/
 │   ├── config/
 │   │   ├── JpaConfig.java                      # Cấu hình EntityManagerFactory JPA 3.0
@@ -137,8 +173,13 @@ my-project/
 │   │   ├── User.java                           # Entity User (quan hệ 1-N với videos)
 │   │   ├── Category.java                       # Entity Category (quan hệ 1-N với videos)
 │   │   └── Video.java                          # Entity Video (N-1 User, N-1 Category, Title NOT NULL)
+│   ├── filter/
+│   │   ├── MySiteMeshFilter.java               # Cấu hình SiteMesh 3 Decorator Filter
+│   │   ├── RememberMeFilter.java               # Tự động đăng nhập qua cookie & xoay token
+│   │   └── AuthFilter.java                     # Kiểm tra quyền truy cập route /admin/*, /manager/*
 │   ├── util/
 │   │   ├── Constant.java                       # Hằng số hệ thống, thư mục upload, session keys
+│   │   ├── ValidationUtil.java                 # Regex & quy tắc kiểm tra Email, Phone, Pass, YouTube
 │   │   ├── PasswordUtil.java                   # Băm BCrypt cost 10, kiểm tra <= 72 bytes
 │   │   ├── HashUtil.java                       # Băm SHA-256, sinh token an toàn
 │   │   └── EmailUtil.java                      # Gửi email bất đồng bộ, dọn dẹp OTP mồ côi
@@ -150,9 +191,6 @@ my-project/
 │   │   ├── IUserService.java & UserServiceImpl.java
 │   │   ├── ICategoryService.java & CategoryServiceImpl.java
 │   │   └── IVideoService.java & VideoServiceImpl.java # Nghiệp vụ Video, chuẩn hóa URL YouTube
-│   ├── filter/
-│   │   ├── RememberMeFilter.java               # Tự động đăng nhập qua cookie & xoay token
-│   │   └── AuthFilter.java                     # Kiểm tra quyền truy cập route /admin/*, /manager/*
 │   └── controllers/
 │       ├── HomeController.java                 # Trang chủ hiển thị top 10 video mới nhất
 │       ├── WaitingController.java              # Điều hướng người dùng sau đăng nhập theo vai trò
@@ -170,12 +208,19 @@ my-project/
 │       └── ImageController.java                # Phục vụ hiển thị avatar, poster và ảnh tĩnh
 ├── src/test/java/vn/iotstar/
 │   ├── TestBootstrapHelper.java                # Helper bootstrap schema test an toàn thread-safe
-│   ├── AuthIntegrationTest.java                # 8 kịch bản kiểm thử bảo mật & xác thực
+│   ├── ValidationTest.java                     # 86 bài test kiểm tra Validation biên (Email, Phone, ...)
+│   ├── AuthIntegrationTest.java                # 8 kịch bản kiểm thử bảo mật & xác thực OTP/BCrypt
 │   └── VideoIntegrationTest.java               # 8 kịch bản kiểm thử Mục 4 Video & phân quyền
 └── src/main/webapp/
-    ├── index.jsp                               # Chuyển hướng về /home
+    ├── WEB-INF/
+    │   └── web.xml                             # Cấu hình Servlet 6.0, SiteMesh filter mapping
+    ├── assets/
+    │   └── js/
+    │       └── form-validation.js              # Script kích hoạt Bootstrap needs-validation & file size check
     └── views/
-        ├── home.jsp                            # Trang chủ giao diện xanh dương (Top 10 Video)
+        ├── decorators/
+        │   └── web.jsp                         # Master Decorator Template Bootstrap 5.3 (Navbar & Footer)
+        ├── home.jsp                            # Trang chủ (Top 10 Video)
         ├── login.jsp & register.jsp            # Trang đăng nhập, đăng ký
         ├── error.jsp                           # Trang thông báo lỗi
         ├── auth/
@@ -212,21 +257,22 @@ my-project/
    mysql -u root -p123456 servletjpa < database-video-seed.sql
    ```
 
-### Bước 2: Chạy Toàn Bộ Kiểm Thử Tự Động (16 Test Cases)
+### Bước 2: Chạy Toàn Bộ Kiểm Thử Tự Động (102 Test Cases)
 ```bash
 mvn clean test
 ```
-Tất cả **16 bài test** đều được thực thi tự động và đạt **BUILD SUCCESS**:
-- **8 Tests Xác thực (`AuthIntegrationTest`):** BCrypt cost 10, chặn mật khẩu > 72 bytes, xác thực OTP tức thời, từ chối OTP hết hạn, hủy sau 5 lần nhập sai, chống race condition trên cùng OTP, dọn dẹp OTP mồ côi khi lỗi hàng đợi, Remember Me Token Rotation.
-- **8 Tests Video (`VideoIntegrationTest`):** CRUD Video đầy đủ, kiểm tra ràng buộc `Title NOT NULL`, phân trang 6 video/trang, Top 10 trang chủ, chuẩn hóa link YouTube, stream HTTP Range cục bộ, duyệt và phân quyền video theo role.
+Tất cả **102 bài test** được thực thi tự động và đạt **BUILD SUCCESS (100% PASS)**:
+- **86 Tests Validation (`ValidationTest`):** Kiểm tra tất cả giá trị biên hợp lệ/không hợp lệ cho Email (RFC standard), Số điện thoại Việt Nam (10 số, đầu 03/05/07/08/09), Tên tài khoản (ký tự đặc biệt, độ dài), Mật khẩu BCrypt (chặn > 72 bytes UTF-8), và tất cả các dạng link YouTube (`watch?v=`, `youtu.be/`, `shorts/`, `embed/`).
+- **8 Tests Xác thực (`AuthIntegrationTest`):** BCrypt cost 10, chặn mật khẩu > 72 bytes, xác thực OTP tức thời, từ chối OTP hết hạn, hủy sau 5 lần nhập sai, chống race condition trên cùng OTP, Remember Me Token Rotation.
+- **8 Tests Video (`VideoIntegrationTest`):** CRUD Video, ràng buộc `Title NOT NULL`, phân trang 6 video/trang, Top 10 trang chủ, stream HTTP Range cục bộ, duyệt và phân quyền video theo role.
 
-### Bước 3: Đóng Gói & Triển Khai Lên Tomcat
+### Bước 3: Đóng Gói & Triển Khai Lên Apache Tomcat
 ```bash
 mvn package -DskipTests
 cp target/my-project.war /home/lmh/tools/apache-tomcat-10.1.61/webapps/
 ```
 
-Truy cập ứng dụng tại:
+Khởi động Tomcat và truy cập ứng dụng tại:
 ```
 http://localhost:8080/my-project/home
 ```
@@ -243,9 +289,3 @@ http://localhost:8080/my-project/home
 | `legacy_user` | `123456` | **USER** (3) | Kiểm thử tính năng tự động nâng cấp mật khẩu từ plaintext sang BCrypt. |
 
 ---
-
-## 7. Lịch Sử Nhánh & Quản Lý Mã Nguồn (Git Branches)
-
-- **`main`**: Nhánh chính chứa toàn bộ mã nguồn hoàn chỉnh mới nhất (Bài tập Mục 4 - hạn 19/11).
-- **`baitap03_16-11`**: Nhánh lưu trữ độc lập bài tập ngày 16/11 (OTP Email, BCrypt, Remember Me).
-- **`baitap02`**: Nhánh lưu trữ bài tập ngày 14/11 (CRUD Category & Video JPA cơ bản).

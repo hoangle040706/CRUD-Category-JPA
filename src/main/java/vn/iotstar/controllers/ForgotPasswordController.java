@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import vn.iotstar.service.IUserService;
 import vn.iotstar.service.UserServiceImpl;
 import vn.iotstar.util.Constant;
+import vn.iotstar.util.ValidationUtil;
 
 @WebServlet(urlPatterns = { "/forgot-password" })
 public class ForgotPasswordController extends HttpServlet {
@@ -35,6 +36,15 @@ public class ForgotPasswordController extends HttpServlet {
         }
 
         email = email.trim();
+
+        // Server-side email format validation
+        if (!ValidationUtil.isValidEmail(email)) {
+            req.setAttribute("alert", "Địa chỉ email không hợp lệ!");
+            req.setAttribute("email", email);
+            req.getRequestDispatcher(Constant.Path.FORGOT_PASSWORD).forward(req, resp);
+            return;
+        }
+
         boolean sent = userService.forgotPassword(email);
         if (sent) {
             HttpSession session = req.getSession(true);

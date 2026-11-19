@@ -82,52 +82,7 @@
     </style>
 </head>
 <body>
-    <header class="topbar">
-        <div class="topbar-container">
-            <div class="nav-brand-group">
-                <a href="${pageContext.request.contextPath}/home" class="brand-logo">MyVideo Platform</a>
-                <nav class="nav-menu">
-                    <a href="${pageContext.request.contextPath}/home" class="nav-link active">Trang chủ</a>
-                    <a href="${pageContext.request.contextPath}/video" class="nav-link">Tất cả Video</a>
-                    <a href="${pageContext.request.contextPath}/admin/category/list" class="nav-link">Danh mục</a>
-                    <c:if test="${not empty sessionScope.account}">
-                        <a href="${pageContext.request.contextPath}/video?filter=my" class="nav-link">Video của tôi</a>
-                        <a href="${pageContext.request.contextPath}/video/upload" class="nav-link">Đăng Video</a>
-                    </c:if>
-                    <c:if test="${sessionScope.account.roleid == 1}">
-                        <a href="${pageContext.request.contextPath}/admin/home" class="nav-link nav-link-badge">Quản trị Admin</a>
-                        <a href="${pageContext.request.contextPath}/admin/videos" class="nav-link nav-link-badge">Duyệt Video</a>
-                    </c:if>
-                    <c:if test="${sessionScope.account.roleid == 2}">
-                        <a href="${pageContext.request.contextPath}/manager/home" class="nav-link nav-link-badge">Bảng điều khiển Manager</a>
-                    </c:if>
-                </nav>
-            </div>
-            <div class="nav-user-group">
-                <c:choose>
-                    <c:when test="${sessionScope.account == null}">
-                        <a href="${pageContext.request.contextPath}/login" class="btn-nav">Đăng nhập</a>
-                        <a href="${pageContext.request.contextPath}/register" class="btn-nav btn-nav-primary">Đăng ký</a>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="user-greeting">
-                            <span class="user-name"><c:out value="${sessionScope.account.fullName}" /></span>
-                            <span class="user-role-pill">
-                                <c:choose>
-                                    <c:when test="${sessionScope.account.roleid == 1}">Admin</c:when>
-                                    <c:when test="${sessionScope.account.roleid == 2}">Manager</c:when>
-                                    <c:otherwise>Thành viên</c:otherwise>
-                                </c:choose>
-                            </span>
-                        </div>
-                        <a href="${pageContext.request.contextPath}/logout" class="btn-logout">Đăng xuất</a>
-                    </c:otherwise>
-                </c:choose>
-            </div>
-        </div>
-    </header>
-
-    <div class="container">
+<div class="container">
         <c:if test="${not empty sessionScope.permissionError}">
             <div class="alert-danger"><c:out value="${sessionScope.permissionError}"/></div>
             <c:remove var="permissionError" scope="session"/>

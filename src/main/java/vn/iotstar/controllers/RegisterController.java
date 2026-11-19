@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpSession;
 import vn.iotstar.service.IUserService;
 import vn.iotstar.service.UserServiceImpl;
 import vn.iotstar.util.Constant;
+import vn.iotstar.util.ValidationUtil;
 
 @WebServlet(urlPatterns = { "/register" })
 public class RegisterController extends HttpServlet {
@@ -28,38 +29,69 @@ public class RegisterController extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
         resp.setCharacterEncoding("UTF-8");
 
-        String username = req.getParameter("username");
-        String password = req.getParameter("password");
-        String email = req.getParameter("email");
-        String fullname = req.getParameter("fullname");
-        String phone = req.getParameter("phone");
+        String rawUsername = req.getParameter("username");
+        String rawPassword = req.getParameter("password");
+        String rawEmail    = req.getParameter("email");
+        String rawFullname = req.getParameter("fullname");
+        String rawPhone    = req.getParameter("phone");
 
-        if (username == null || username.trim().isEmpty()
-                || password == null || password.trim().isEmpty()
-                || email == null || email.trim().isEmpty()) {
+        String username = rawUsername != null ? rawUsername.trim() : "";
+        String password = rawPassword != null ? rawPassword.trim() : "";
+        String email    = rawEmail != null ? rawEmail.trim() : "";
+        String fullname = rawFullname != null ? rawFullname.trim() : "";
+        String phone    = rawPhone != null ? rawPhone.trim() : "";
+
+        if (username.isEmpty() || password.isEmpty() || email.isEmpty()) {
+            setFormAttributes(req, username, fullname, email, phone);
             req.setAttribute("alert", "Vui lòng nhập đầy đủ các thông tin bắt buộc!");
             req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
             return;
         }
 
-        username = username.trim();
-        email = email.trim();
-        password = password.trim();
-
-        if (password.getBytes(StandardCharsets.UTF_8).length > 72) {
-            req.setAttribute("alert", "Mật khẩu không được vượt quá 72 bytes!");
+        // Validate username format
+        if (!ValidationUtil.isValidUsername(username)) {
+            req.setAttribute("alert", "Tên tài khoản 3–50 ký tự, chỉ chứa chữ cái, số và dấu gạch dưới!");
+            setFormAttributes(req, username, fullname, email, phone);
             req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
             return;
         }
 
+        // Validate email format
+        if (!ValidationUtil.isValidEmail(email)) {
+            req.setAttribute("alert", "Địa chỉ email không hợp lệ!");
+            setFormAttributes(req, username, fullname, email, phone);
+            req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
+            return;
+        }
+
+        // Validate phone (required)
+        if (!phone.isEmpty() && !ValidationUtil.isValidPhone(phone)) {
+            req.setAttribute("alert", "Số điện thoại không hợp lệ! Vui lòng nhập 10 chữ số VN bắt đầu bằng 0.");
+            setFormAttributes(req, username, fullname, email, phone);
+            req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
+            return;
+        }
+
+        // Validate password byte length
+        if (!ValidationUtil.isValidPassword(password)) {
+            req.setAttribute("alert", "Mật khẩu phải từ 6 đến 72 bytes UTF-8!");
+            setFormAttributes(req, username, fullname, email, phone);
+            req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
+            return;
+        }
+
+        // Check username uniqueness
         if (userService.checkExistUsername(username)) {
             req.setAttribute("alert", "Tên đăng nhập đã tồn tại!");
+            setFormAttributes(req, username, fullname, email, phone);
             req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
             return;
         }
 
+        // Check email uniqueness
         if (userService.checkExistEmail(email)) {
             req.setAttribute("alert", "Email đã tồn tại!");
+            setFormAttributes(req, username, fullname, email, phone);
             req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
             return;
         }
@@ -71,7 +103,15 @@ public class RegisterController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/verify-otp");
         } else {
             req.setAttribute("alert", "Đăng ký thất bại, hệ thống đang bận. Vui lòng thử lại sau!");
+            setFormAttributes(req, username, fullname, email, phone);
             req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
         }
+    }
+
+    private void setFormAttributes(HttpServletRequest req, String username, String fullname, String email, String phone) {
+        req.setAttribute("username", username);
+        req.setAttribute("fullname", fullname);
+        req.setAttribute("email", email);
+        req.setAttribute("phone", phone);
     }
 }

@@ -8,7 +8,8 @@
     <title>Xác Thực Mã OTP - MyVideo Platform</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
-        body { background-color: #f8fafc; color: #0f172a; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        body { background-color: #f8fafc; color: #0f172a; }
+        .auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 160px); padding: 36px 16px; width: 100%; }
         .box { background: #fff; padding: 36px 32px; border-radius: 12px; width: 100%; max-width: 440px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
         .brand-header { text-align: center; margin-bottom: 15px; }
         .brand-title { color: #1e3a8a; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
@@ -34,6 +35,7 @@
     </style>
 </head>
 <body>
+    <div class="auth-wrapper">
     <div class="box">
         <div class="brand-header">
             <div class="brand-title">Xác Thực Tài Khoản</div>
@@ -69,6 +71,7 @@
         <div class="extra-links">
             <a href="${pageContext.request.contextPath}/login">&larr; Quay lại trang đăng nhập</a>
         </div>
+    </div>
     </div>
 
     <script>

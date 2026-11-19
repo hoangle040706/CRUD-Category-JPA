@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpSession;
 import vn.iotstar.service.IUserService;
 import vn.iotstar.service.UserServiceImpl;
 import vn.iotstar.util.Constant;
+import vn.iotstar.util.ValidationUtil;
 
 @WebServlet(urlPatterns = { "/reset-password", "/resend-reset-otp" })
 public class ResetPasswordController extends HttpServlet {
@@ -78,14 +79,23 @@ public class ResetPasswordController extends HttpServlet {
         password = password.trim();
         confirmPassword = confirmPassword.trim();
 
-        if (!password.equals(confirmPassword)) {
-            req.setAttribute("alert", "Xác nhận mật khẩu không khớp!");
+        if (!otp.matches("\\d{6}")) {
+            req.setAttribute("alert", "Mã OTP phải gồm 6 chữ số!");
+            req.setAttribute("otp", otp);
             req.getRequestDispatcher(Constant.Path.RESET_PASSWORD).forward(req, resp);
             return;
         }
 
-        if (password.getBytes(StandardCharsets.UTF_8).length > 72) {
-            req.setAttribute("alert", "Mật khẩu không được vượt quá 72 bytes!");
+        if (!password.equals(confirmPassword)) {
+            req.setAttribute("alert", "Xác nhận mật khẩu không khớp!");
+            req.setAttribute("otp", otp);
+            req.getRequestDispatcher(Constant.Path.RESET_PASSWORD).forward(req, resp);
+            return;
+        }
+
+        if (!ValidationUtil.isValidPassword(password)) {
+            req.setAttribute("alert", "Mật khẩu phải từ 6 đến 72 bytes UTF-8!");
+            req.setAttribute("otp", otp);
             req.getRequestDispatcher(Constant.Path.RESET_PASSWORD).forward(req, resp);
             return;
         }
