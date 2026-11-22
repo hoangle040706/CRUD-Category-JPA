@@ -7,6 +7,11 @@ public class Constant {
     public static final String SESSION_USER = "user";
     public static final String SESSION_PENDING_REGISTER_EMAIL = "PENDING_REGISTER_EMAIL";
     public static final String SESSION_PENDING_RESET_EMAIL = "PENDING_RESET_EMAIL";
+    public static final String SESSION_PENDING_EMAIL_UPDATE = "PENDING_EMAIL_UPDATE";
+    public static final String SESSION_PASSWORD_FAIL_COUNT = "PASSWORD_FAIL_COUNT";
+    public static final String SESSION_PASSWORD_LOCK_UNTIL = "PASSWORD_LOCK_UNTIL";
+    public static final String SESSION_FLASH_SUCCESS = "flash_success";
+    public static final String SESSION_FLASH_ERROR = "flash_error";
 
     public static final String COOKIE_REMEMBER = "remember-me";
     public static final String COOKIE_REMEMBER_TOKEN = "remember-me";
@@ -16,7 +21,7 @@ public class Constant {
     public static final int OTP_MAX_ATTEMPTS = 5;
 
     public static final boolean DEV_MODE = Boolean.parseBoolean(
-            System.getProperty("APP_DEV_MODE", System.getenv().getOrDefault("APP_DEV_MODE", "false")));
+            System.getProperty("APP_DEV_MODE", System.getenv().getOrDefault("APP_DEV_MODE", "true")));
 
     public static final String SMTP_HOST = System.getProperty("SMTP_HOST",
             System.getenv().getOrDefault("SMTP_HOST", "smtp.gmail.com"));
@@ -50,12 +55,24 @@ public class Constant {
         public static final String RESET_PASSWORD = "/views/auth/reset-password.jsp";
         public static final String ADMIN_HOME = "/views/admin/home.jsp";
         public static final String USER_HOME = "/views/home.jsp";
+        public static final String PROFILE = "/views/profile.jsp";
+        public static final String PROFILE_VERIFY_OTP = "/views/profile-verify-otp.jsp";
     }
 
     public static final String REGISTER = Path.REGISTER;
 
     public static String getUploadDir() {
         return customUploadDir != null ? customUploadDir : DIR;
+    }
+
+    public static String getAvatarDir() {
+        String base = getUploadDir();
+        String avatarPath = base + File.separator + "avatars";
+        File dir = new File(avatarPath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return avatarPath;
     }
 
     public static String getPosterDir() {
@@ -90,6 +107,7 @@ public class Constant {
         customUploadDir = f.getAbsolutePath();
         new File(customUploadDir + File.separator + "posters").mkdirs();
         new File(customUploadDir + File.separator + "videos").mkdirs();
+        new File(customUploadDir + File.separator + "avatars").mkdirs();
     }
 
     public static synchronized void resetUploadDirForTest() {

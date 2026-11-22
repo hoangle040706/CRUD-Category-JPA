@@ -15,7 +15,8 @@ import jakarta.servlet.http.HttpSession;
 import vn.iotstar.entity.User;
 
 @WebFilter(filterName = "AuthFilter", urlPatterns = {
-        "/admin", "/admin/*", "/manager/*", "/category/*", "/category", "/video", "/video/*"
+        "/admin", "/admin/*", "/manager/*", "/category/*", "/category", "/video", "/video/*",
+        "/profile", "/profile/*"
 })
 public class AuthFilter implements Filter {
 

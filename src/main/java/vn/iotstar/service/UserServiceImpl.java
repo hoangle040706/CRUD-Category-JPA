@@ -231,4 +231,20 @@ public class UserServiceImpl implements IUserService {
     public List<User> getAll() {
         return userDao.findAll();
     }
+
+    @Override
+    public boolean updateProfile(User user) {
+        if (user == null) {
+            return false;
+        }
+        return userDao.updateProfile(user.getId(), user.getFullname(), user.getPhone(), user.getAvatar());
+    }
+
+    @Override
+    public boolean verifyPassword(User user, String rawPassword) {
+        if (user == null || rawPassword == null) {
+            return false;
+        }
+        return PasswordUtil.check(rawPassword, user.getPassword());
+    }
 }

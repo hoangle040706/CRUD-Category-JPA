@@ -83,4 +83,58 @@ public class ValidationUtil {
         if (url == null || url.isBlank()) return false;
         return YOUTUBE_PATTERN.matcher(url.trim()).matches();
     }
+
+    /**
+     * Whitelist extensions for avatar images.
+     */
+    public static boolean hasValidImageExtension(String fileName) {
+        if (fileName == null || fileName.isBlank()) return false;
+        String lower = fileName.trim().toLowerCase();
+        return lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".webp");
+    }
+
+    /**
+     * Validates image header magic bytes (JPEG, PNG, WebP).
+     * Skips bytes 4-7 for WebP RIFF file length.
+     *
+     * @param header first bytes of the file (at least 12 bytes recommended)
+     * @return true if magic bytes match JPEG, PNG, or WebP
+     */
+    public static boolean isValidImageMagicBytes(byte[] header) {
+        if (header == null || header.length < 4) {
+            return false;
+        }
+
+        // JPEG: FF D8 FF
+        if (header.length >= 3
+                && (header[0] & 0xFF) == 0xFF
+                && (header[1] & 0xFF) == 0xD8
+                && (header[2] & 0xFF) == 0xFF) {
+            return true;
+        }
+
+        // PNG: 89 50 4E 47 (0x89, 'P', 'N', 'G')
+        if (header.length >= 4
+                && (header[0] & 0xFF) == 0x89
+                && (header[1] & 0xFF) == 0x50
+                && (header[2] & 0xFF) == 0x4E
+                && (header[3] & 0xFF) == 0x47) {
+            return true;
+        }
+
+        // WebP: RIFF (bytes 0-3: 0x52, 0x49, 0x46, 0x46) and WEBP (bytes 8-11: 0x57, 0x45, 0x42, 0x50)
+        if (header.length >= 12
+                && (header[0] & 0xFF) == 0x52
+                && (header[1] & 0xFF) == 0x49
+                && (header[2] & 0xFF) == 0x46
+                && (header[3] & 0xFF) == 0x46
+                && (header[8] & 0xFF) == 0x57
+                && (header[9] & 0xFF) == 0x45
+                && (header[10] & 0xFF) == 0x42
+                && (header[11] & 0xFF) == 0x50) {
+            return true;
+        }
+
+        return false;
+    }
 }

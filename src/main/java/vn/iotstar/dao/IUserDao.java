@@ -45,4 +45,8 @@ public interface IUserDao {
     void clearRememberToken(int userId);
 
     void updatePassword(int userId, String newHashedPassword);
+
+    boolean updateProfile(int userId, String fullname, String phone, String avatar);
+
+    boolean updateEmail(int userId, String newEmail);
 }

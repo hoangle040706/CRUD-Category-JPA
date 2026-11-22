@@ -28,27 +28,42 @@ public class DownloadImageController extends HttpServlet {
             fileName = Constant.DEFAULT_FILENAME;
         }
 
+        if (fileName.contains("?")) {
+            fileName = fileName.substring(0, fileName.indexOf('?'));
+        }
+
         // Loại bỏ ký tự độc hại / path traversal trong tên file
         fileName = new File(fileName).getName();
 
-        File targetDir = "poster".equalsIgnoreCase(type)
-                ? new File(Constant.getPosterDir()).getCanonicalFile()
-                : new File(Constant.getUploadDir()).getCanonicalFile();
+        File targetDir;
+        if ("avatar".equalsIgnoreCase(type)) {
+            targetDir = new File(Constant.getAvatarDir()).getCanonicalFile();
+        } else if ("poster".equalsIgnoreCase(type)) {
+            targetDir = new File(Constant.getPosterDir()).getCanonicalFile();
+        } else {
+            targetDir = new File(Constant.getUploadDir()).getCanonicalFile();
+        }
 
         File requestedFile = new File(targetDir, fileName);
-        if (!requestedFile.exists() && "poster".equalsIgnoreCase(type)) {
-            // Thử tìm trong upload dir chung
-            File fallback = new File(Constant.getUploadDir(), fileName);
-            if (fallback.exists()) {
-                requestedFile = fallback;
-                targetDir = new File(Constant.getUploadDir()).getCanonicalFile();
-            }
-        } else if (!requestedFile.exists()) {
-            // Thử tìm trong posters
-            File fallback = new File(Constant.getPosterDir(), fileName);
-            if (fallback.exists()) {
-                requestedFile = fallback;
-                targetDir = new File(Constant.getPosterDir()).getCanonicalFile();
+        if (!requestedFile.exists()) {
+            File fallbackAvatar = new File(Constant.getAvatarDir(), fileName);
+            if (fallbackAvatar.exists()) {
+                requestedFile = fallbackAvatar;
+                targetDir = new File(Constant.getAvatarDir()).getCanonicalFile();
+            } else if ("poster".equalsIgnoreCase(type)) {
+                // Thử tìm trong upload dir chung
+                File fallback = new File(Constant.getUploadDir(), fileName);
+                if (fallback.exists()) {
+                    requestedFile = fallback;
+                    targetDir = new File(Constant.getUploadDir()).getCanonicalFile();
+                }
+            } else {
+                // Thử tìm trong posters
+                File fallback = new File(Constant.getPosterDir(), fileName);
+                if (fallback.exists()) {
+                    requestedFile = fallback;
+                    targetDir = new File(Constant.getPosterDir()).getCanonicalFile();
+                }
             }
         }
 

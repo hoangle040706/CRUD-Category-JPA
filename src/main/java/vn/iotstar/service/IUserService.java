@@ -64,4 +64,8 @@ public interface IUserService {
     boolean checkExistPhone(String phone);
 
     List<User> getAll();
+
+    boolean updateProfile(User user);
+
+    boolean verifyPassword(User user, String rawPassword);
 }

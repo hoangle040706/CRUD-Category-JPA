@@ -410,4 +410,59 @@ public class UserDao implements IUserDao {
             enma.close();
         }
     }
+
+    @Override
+    public boolean updateProfile(int userId, String fullname, String phone, String avatar) {
+        EntityManager enma = JpaConfig.getEntityManager();
+        EntityTransaction trans = enma.getTransaction();
+        try {
+            trans.begin();
+            String jpql = "UPDATE User u SET u.fullname = :fullname, u.phone = :phone, u.avatar = :avatar WHERE u.id = :id";
+            int rows = enma.createQuery(jpql)
+                    .setParameter("fullname", fullname)
+                    .setParameter("phone", phone)
+                    .setParameter("avatar", avatar)
+                    .setParameter("id", userId)
+                    .executeUpdate();
+            trans.commit();
+            enma.clear();
+            return rows > 0;
+        } catch (Exception e) {
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            throw e;
+        } finally {
+            enma.close();
+        }
+    }
+
+    @Override
+    public boolean updateEmail(int userId, String newEmail) {
+        EntityManager enma = JpaConfig.getEntityManager();
+        EntityTransaction trans = enma.getTransaction();
+        try {
+            trans.begin();
+            String jpql = "UPDATE User u SET u.email = :email WHERE u.id = :id";
+            int rows = enma.createQuery(jpql)
+                    .setParameter("email", newEmail)
+                    .setParameter("id", userId)
+                    .executeUpdate();
+            trans.commit();
+            enma.clear();
+            return rows > 0;
+        } catch (jakarta.persistence.PersistenceException pe) {
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            return false;
+        } catch (Exception e) {
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            throw e;
+        } finally {
+            enma.close();
+        }
+    }
 }

@@ -12,6 +12,18 @@
         <tracking-mode>COOKIE</tracking-mode>
     </session-config>
 
+    <!-- Character Encoding Filter: Runs first to ensure UTF-8 before any parameter parsing -->
+    <filter>
+        <filter-name>characterEncodingFilter</filter-name>
+        <filter-class>vn.iotstar.filter.CharacterEncodingFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>characterEncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+
     <!-- SiteMesh 3 decorator filter -->
     <filter>
         <filter-name>sitemesh</filter-name>

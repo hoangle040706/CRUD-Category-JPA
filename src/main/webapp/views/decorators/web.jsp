@@ -190,9 +190,28 @@
                     </c:when>
                     <c:otherwise>
                         <div class="d-flex align-items-center gap-2 flex-nowrap">
-                            <span style="color:#fff; font-weight:600; font-size:13.5px; white-space:nowrap;">
-                                <c:out value="${sessionScope.account.fullName}"/>
-                            </span>
+                            <a href="${pageContext.request.contextPath}/profile" class="d-flex align-items-center gap-2 text-decoration-none" title="Xem hồ sơ cá nhân">
+                                <c:choose>
+                                    <c:when test="${not empty sessionScope.account.avatar}">
+                                        <c:choose>
+                                            <c:when test="${sessionScope.account.avatar.startsWith('http')}">
+                                                <img src="${sessionScope.account.avatar}" alt="Avatar" class="rounded-circle" style="width:34px; height:34px; object-fit:cover; border:2px solid rgba(255,255,255,.8);" />
+                                            </c:when>
+                                            <c:otherwise>
+                                                <img src="${pageContext.request.contextPath}/image?type=avatar&fname=${sessionScope.account.avatar}" alt="Avatar" class="rounded-circle" style="width:34px; height:34px; object-fit:cover; border:2px solid rgba(255,255,255,.8);" />
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-white text-primary fw-bold" style="width:34px; height:34px; font-size:14px; border:2px solid rgba(255,255,255,.8);">
+                                            <c:out value="${sessionScope.account.username != null ? sessionScope.account.username.substring(0, 1).toUpperCase() : 'U'}" />
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                                <span style="color:#fff; font-weight:600; font-size:13.5px; white-space:nowrap;">
+                                    <c:out value="${not empty sessionScope.account.fullname ? sessionScope.account.fullname : sessionScope.account.username}"/>
+                                </span>
+                            </a>
                             <span class="user-role-pill">
                                 <c:choose>
                                     <c:when test="${sessionScope.account.roleid == 1}">Admin</c:when>
@@ -201,6 +220,7 @@
                                 </c:choose>
                             </span>
                         </div>
+                        <a href="${pageContext.request.contextPath}/profile" class="btn-nav-login ${uri.contains('/profile') ? 'active' : ''}">Hồ sơ</a>
                         <a href="${pageContext.request.contextPath}/logout" class="btn-logout-nav">Đăng xuất</a>
                     </c:otherwise>
                 </c:choose>

@@ -47,9 +47,15 @@ public class CsrfUtil {
         }
         String sessionToken = (String) session.getAttribute(SESSION_CSRF_KEY);
         if (sessionToken == null || sessionToken.trim().isEmpty()) {
+            sessionToken = (String) session.getAttribute("csrf_token");
+        }
+        if (sessionToken == null || sessionToken.trim().isEmpty()) {
             return false;
         }
         String reqToken = req.getParameter(CSRF_PARAM_NAME);
+        if (reqToken == null) {
+            reqToken = req.getParameter("csrf_token");
+        }
         if (reqToken == null) {
             reqToken = req.getHeader("X-CSRF-Token");
         }

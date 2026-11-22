@@ -32,6 +32,18 @@ public final class HashUtil {
         }
     }
 
+    public static byte[] sha256Bytes(String input) {
+        if (input == null) {
+            return null;
+        }
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return digest.digest(input.getBytes(StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not available", e);
+        }
+    }
+
     public static String generateRandomToken() {
         return generateSecureToken(32);
     }
